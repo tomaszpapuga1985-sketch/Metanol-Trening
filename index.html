@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
-  <title>Trening – 3 drużyny + tabela</title>
+  <title>Trening – losowanie 3 składy</title>
   <style>
     :root{
       --bg:#0b1220;
@@ -40,18 +40,7 @@
     }
     h1{margin:0;font-size:18px}
     .sub{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.35}
-    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    .tab{
-      border:1px solid var(--border);
-      background:#162446;
-      color:var(--text);
-      padding:10px 12px;
-      border-radius:999px;
-      font-weight:800;
-      cursor:pointer;
-      font-size:13px;
-    }
-    .tab.active{background:#22345f}
+
     .grid{display:grid;grid-template-columns:1fr;gap:12px}
     @media(min-width:980px){.grid{grid-template-columns:420px 1fr}}
 
@@ -65,7 +54,7 @@
     }
 
     textarea{
-      width:100%; min-height:160px; resize:vertical;
+      width:100%; min-height:200px; resize:vertical;
       border-radius:14px;
       border:1px solid var(--border);
       background:#0b1427;
@@ -89,265 +78,111 @@
     }
     button.secondary{background:#0f1b35}
     button.danger{background:#3a1630}
-    button:disabled{opacity:.55;cursor:not-allowed}
-
     .status{margin-top:10px;font-size:13px;color:var(--muted)}
 
-    .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-    .chip{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:8px 10px;border-radius:999px;
-      border:1px solid var(--border);
-      background:rgba(0,0,0,.12);
-      font-size:13px
+    .teams{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
     }
-    .dot{width:10px;height:10px;border-radius:99px;display:inline-block}
+    @media(min-width:720px){.teams{grid-template-columns:repeat(3,1fr)}}
+
+    .teamCard{
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:rgba(0,0,0,.18);
+      padding:12px;
+      box-shadow:0 8px 18px rgba(0,0,0,.25);
+      min-height:240px;
+    }
+    .teamTitle{
+      display:flex; align-items:center; gap:10px;
+      font-weight:1000;
+      margin-bottom:10px;
+    }
+    .dot{width:12px;height:12px;border-radius:99px;display:inline-block}
     .dot.yellow{background:var(--yellow)}
     .dot.orange{background:var(--orange)}
     .dot.purple{background:var(--purple)}
+    .count{margin-left:auto;color:var(--muted);font-size:12px;font-weight:800}
 
-    .cardsHead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
-    .counter{font-size:13px;color:var(--muted)}
-    .cards{display:grid;grid-template-columns:1fr;gap:10px}
-    @media(min-width:520px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    @media(min-width:900px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
-
-    .cardBtn{
-      width:100%; text-align:left;
-      padding:14px;
-      border-radius:16px;
-      border:1px solid var(--border);
-      background:rgba(0,0,0,.18);
-      box-shadow:0 8px 18px rgba(0,0,0,.25);
-      cursor:pointer;
-      min-height:78px;
-      position:relative; overflow:hidden;
-    }
-    .name{font-weight:1000;font-size:15px;margin-bottom:6px}
-    .hint{font-size:12px;color:rgba(233,238,252,.55)}
-    .reveal{display:none;margin-top:6px;font-weight:1000;padding:7px 10px;border-radius:999px;width:max-content;font-size:12px;border:1px solid rgba(255,255,255,.16)}
-    .reveal.yellow{background:rgba(255,212,0,.18)}
-    .reveal.orange{background:rgba(255,122,0,.18)}
-    .reveal.purple{background:rgba(168,85,247,.18)}
-    .cardBtn.revealed .hint{display:none}
-    .cardBtn.revealed .reveal{display:inline-flex}
-    .cardBtn::after{
-      content:""; position:absolute; inset:auto -90px -90px auto;
-      width:200px;height:200px;
-      background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.18), transparent 60%);
-      transform:rotate(25deg);
-      pointer-events:none;
-    }
-
-    .split{display:none}
-    .split.show{display:block}
-
-    /* RESULTS */
-    .formRow{display:grid;grid-template-columns:1fr;gap:10px}
-    @media(min-width:700px){.formRow{grid-template-columns: 1fr 1fr 1fr 1fr auto}}
-    select, input{
-      border-radius:14px;
-      border:1px solid var(--border);
-      background:#0b1427;
-      color:var(--text);
-      padding:12px;
-      outline:none;
-      font-size:14px;
-    }
-    input{width:100%}
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      overflow:hidden;
-      border-radius:16px;
-      border:1px solid var(--border);
-      background:rgba(0,0,0,.18);
-      margin-top:12px;
-    }
-    thead th{
-      text-align:left;
-      padding:10px;
-      font-size:13px;
-      border-bottom:1px solid var(--border);
-      color:#fff;
-    }
-    tbody td{
-      padding:9px 10px;
-      font-size:13px;
-      border-bottom:1px solid rgba(255,255,255,.06);
-    }
-    tbody tr:last-child td{border-bottom:none}
+    ul{margin:0;padding-left:18px}
+    li{margin:6px 0}
     .small{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.35}
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:8px 10px;border-radius:999px;
-      border:1px solid var(--border);
-      background:rgba(0,0,0,.12);
-      font-size:13px
-    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <h1>Trening – 3 drużyny + tabela</h1>
-      <div class="sub">Losowanie do Żółtych / Pomarańczowych / Fioletowych + wpisywanie wyników i automatyczna tabela.</div>
-      <div class="tabs">
-        <button class="tab active" id="tabDraw">Losowanie</button>
-        <button class="tab" id="tabResults">Wyniki & tabela</button>
-      </div>
+      <h1>Trening – losowanie 3 składy</h1>
+      <div class="sub">Wpisujesz zawodników → „Losuj równo” → wyświetla 3 składy (Żółci / Pomarańczowi / Fioletowi).</div>
     </header>
 
     <div class="grid">
-      <!-- LEFT -->
       <div class="panel">
-        <!-- LOSOWANIE -->
-        <div id="viewDraw" class="split show">
-          <div style="font-weight:900;font-size:14px;margin-bottom:8px;">Zawodnicy (1 linia = 1 osoba)</div>
-          <textarea id="players" placeholder="np.
+        <div style="font-weight:900;font-size:14px;margin-bottom:8px;">Zawodnicy (1 linia = 1 osoba)</div>
+        <textarea id="players" placeholder="np.
 Tomek
 Kuba
 Mati
 Bartek
 ..."></textarea>
 
-          <div class="legend">
-            <span class="chip"><span class="dot yellow"></span> Żółci</span>
-            <span class="chip"><span class="dot orange"></span> Pomarańczowi</span>
-            <span class="chip"><span class="dot purple"></span> Fioletowi</span>
-          </div>
-
-          <div class="row">
-            <button id="drawBtn">Losuj składy</button>
-            <button id="reshuffleBtn" class="secondary" disabled>Wymieszaj ponownie</button>
-            <button id="saveTeamsBtn" class="secondary" disabled>Zapisz do tabeli</button>
-            <button id="resetBtn" class="danger">Reset</button>
-          </div>
-
-          <div class="status" id="statusDraw">Wpisz zawodników i losuj.</div>
-          <div class="small">
-            Tip: „Zapisz do tabeli” zapisuje składy do pamięci, żebyś widział je też w zakładce Wyniki.
-          </div>
+        <div class="row">
+          <button id="drawBtn">Losuj równo</button>
+          <button id="reshuffleBtn" class="secondary" disabled>Losuj jeszcze raz</button>
+          <button id="copyBtn" class="secondary" disabled>Kopiuj składy</button>
+          <button id="resetBtn" class="danger">Reset</button>
         </div>
 
-        <!-- WYNIKI -->
-        <div id="viewResults" class="split">
-          <div style="font-weight:900;font-size:14px;margin-bottom:8px;">Dodaj wynik meczu</div>
-
-          <div class="formRow">
-            <select id="teamA"></select>
-            <input id="goalsA" type="number" min="0" inputmode="numeric" placeholder="gole A" />
-            <select id="teamB"></select>
-            <input id="goalsB" type="number" min="0" inputmode="numeric" placeholder="gole B" />
-            <button id="addMatchBtn">Dodaj</button>
-          </div>
-
-          <div class="row" style="margin-top:10px;">
-            <button id="undoBtn" class="secondary" disabled>Cofnij ostatni</button>
-            <button id="clearMatchesBtn" class="danger">Wyczyść wyniki</button>
-          </div>
-
-          <div class="status" id="statusRes">Wpisz wynik i kliknij „Dodaj”.</div>
-          <div class="small">
-            Punkty: zwycięstwo 3, remis 1, porażka 0. Tabela liczy M/Z/R/P, bramki, różnicę i punkty.
-          </div>
+        <div class="status" id="status">Wpisz zawodników i kliknij „Losuj równo”.</div>
+        <div class="small">
+          Zasada: rozdzielam po kolei do 3 drużyn po wymieszaniu listy (różnica max 1 osoba).
         </div>
       </div>
 
-      <!-- RIGHT -->
       <div class="panel">
-        <!-- LOSOWANIE: karty + tabelki składów -->
-        <div id="rightDraw" class="split show">
-          <div class="cardsHead">
-            <div style="font-weight:1000;">Zakryte okienka</div>
-            <div class="counter" id="counter">Odkryte: 0 / 0</div>
+        <div class="teams">
+          <div class="teamCard">
+            <div class="teamTitle"><span class="dot yellow"></span> Żółci <span class="count" id="cYellow">0</span></div>
+            <ul id="listYellow"></ul>
           </div>
-          <div class="cards" id="cards"></div>
-
-          <div id="teamsPreview" style="display:none;margin-top:14px;gap:12px;">
-            <div class="pill"><span class="dot purple"></span><b>Fioletowi:</b> <span id="listPurple"></span></div>
-            <div class="pill"><span class="dot yellow"></span><b>Żółci:</b> <span id="listYellow"></span></div>
-            <div class="pill"><span class="dot orange"></span><b>Pomarańczowi:</b> <span id="listOrange"></span></div>
+          <div class="teamCard">
+            <div class="teamTitle"><span class="dot orange"></span> Pomarańczowi <span class="count" id="cOrange">0</span></div>
+            <ul id="listOrange"></ul>
           </div>
-        </div>
-
-        <!-- WYNIKI: tabela + lista meczów -->
-        <div id="rightResults" class="split">
-          <div style="font-weight:1000;">Tabela</div>
-          <table>
-            <thead>
-              <tr>
-                <th>Drużyna</th><th>M</th><th>Z</th><th>R</th><th>P</th><th>Bramki</th><th>+/-</th><th>Pkt</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-          </table>
-
-          <div style="margin-top:14px;font-weight:1000;">Mecze</div>
-          <table>
-            <thead>
-              <tr><th>#</th><th>Mecz</th><th>Wynik</th></tr>
-            </thead>
-            <tbody id="matchesBody"></tbody>
-          </table>
-
-          <div class="small" id="teamsHint"></div>
+          <div class="teamCard">
+            <div class="teamTitle"><span class="dot purple"></span> Fioletowi <span class="count" id="cPurple">0</span></div>
+            <ul id="listPurple"></ul>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
 <script>
-  // --- Tabs ---
-  const tabDraw = document.getElementById("tabDraw");
-  const tabResults = document.getElementById("tabResults");
-  const viewDraw = document.getElementById("viewDraw");
-  const viewResults = document.getElementById("viewResults");
-  const rightDraw = document.getElementById("rightDraw");
-  const rightResults = document.getElementById("rightResults");
-
-  function showTab(which){
-    const drawOn = which === "draw";
-    tabDraw.classList.toggle("active", drawOn);
-    tabResults.classList.toggle("active", !drawOn);
-    viewDraw.classList.toggle("show", drawOn);
-    rightDraw.classList.toggle("show", drawOn);
-    viewResults.classList.toggle("show", !drawOn);
-    rightResults.classList.toggle("show", !drawOn);
-    if(!drawOn) renderAllTables();
-  }
-
-  tabDraw.addEventListener("click", () => showTab("draw"));
-  tabResults.addEventListener("click", () => showTab("results"));
-
-  // --- Teams constants ---
-  const TEAMS = [
-    { key:"yellow", name:"Żółci", color:"yellow" },
-    { key:"orange", name:"Pomarańczowi", color:"orange" },
-    { key:"purple", name:"Fioletowi", color:"purple" },
-  ];
-
-  // --- LOSOWANIE ---
   const elPlayers = document.getElementById("players");
-  const elCards = document.getElementById("cards");
-  const elStatusDraw = document.getElementById("statusDraw");
-  const elCounter = document.getElementById("counter");
   const drawBtn = document.getElementById("drawBtn");
   const reshuffleBtn = document.getElementById("reshuffleBtn");
-  const saveTeamsBtn = document.getElementById("saveTeamsBtn");
+  const copyBtn = document.getElementById("copyBtn");
   const resetBtn = document.getElementById("resetBtn");
+  const statusEl = document.getElementById("status");
 
-  const teamsPreview = document.getElementById("teamsPreview");
-  const listPurple = document.getElementById("listPurple");
   const listYellow = document.getElementById("listYellow");
   const listOrange = document.getElementById("listOrange");
+  const listPurple = document.getElementById("listPurple");
 
-  let assignments = []; // {name, teamKey}
-  let revealedCount = 0;
+  const cYellow = document.getElementById("cYellow");
+  const cOrange = document.getElementById("cOrange");
+  const cPurple = document.getElementById("cPurple");
+
+  let lastTeams = null;
 
   function sanitizeNames(raw){
-    return raw.split("\n").map(s=>s.trim()).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i);
+    return raw.split("\n")
+      .map(s=>s.trim())
+      .filter(Boolean)
+      .filter((v,i,a)=>a.indexOf(v)===i); // usuń duplikaty
   }
   function shuffle(arr){
     for(let i=arr.length-1;i>0;i--){
@@ -356,229 +191,107 @@ Bartek
     }
     return arr;
   }
-  function assignTeams(names){
-    const list = shuffle([...names]);
-    return list.map((name,idx)=>({name, teamKey: TEAMS[idx%3].key}));
+  function renderList(el, names){
+    el.innerHTML = names.map(n => `<li>${escapeHtml(n)}</li>`).join("");
   }
-  function teamByKey(key){ return TEAMS.find(t=>t.key===key); }
-  function setDrawStatus(msg){ elStatusDraw.textContent = msg; }
-  function updateCounter(){ elCounter.textContent = `Odkryte: ${revealedCount} / ${assignments.length}`; }
   function escapeHtml(str){
     return str.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
   }
 
-  function renderTeamsPreview(){
-    const groups = {yellow:[], orange:[], purple:[]};
-    assignments.forEach(a=>groups[a.teamKey].push(a.name));
-    Object.keys(groups).forEach(k=>groups[k].sort((a,b)=>a.localeCompare(b,"pl")));
-
-    listPurple.textContent = groups.purple.join(", ");
-    listYellow.textContent = groups.yellow.join(", ");
-    listOrange.textContent = groups.orange.join(", ");
-
-    teamsPreview.style.display = "grid";
-  }
-
-  function renderCards(){
-    elCards.innerHTML = "";
-    teamsPreview.style.display = "none";
-    revealedCount = 0;
-    updateCounter();
-    saveTeamsBtn.disabled = true;
-
-    assignments.forEach((a)=>{
-      const team = teamByKey(a.teamKey);
-      const btn = document.createElement("button");
-      btn.className = "cardBtn";
-      btn.type = "button";
-      btn.dataset.revealed = "0";
-      btn.innerHTML = `
-        <div class="name">${escapeHtml(a.name)}</div>
-        <div class="hint">Kliknij, żeby odkryć drużynę</div>
-        <div class="reveal ${team.color}">Drużyna: ${team.name}</div>
-      `;
-      btn.addEventListener("click", ()=>{
-        if(btn.dataset.revealed==="1") return;
-        btn.dataset.revealed="1";
-        btn.classList.add("revealed");
-        revealedCount++;
-        updateCounter();
-        if(revealedCount===assignments.length){
-          setDrawStatus("Wszyscy odkryli przydział ✅");
-          renderTeamsPreview();
-          saveTeamsBtn.disabled = false;
-        } else {
-          setDrawStatus("Odkrywajcie dalej 🙂");
-        }
-      });
-      elCards.appendChild(btn);
+  function drawTeams(){
+    const names = sanitizeNames(elPlayers.value);
+    if(names.length < 3){
+      statusEl.textContent = "Dodaj minimum 3 zawodników (po 1 w linii).";
+      return null;
+    }
+    const mixed = shuffle([...names]);
+    const yellow = [], orange = [], purple = [];
+    mixed.forEach((name, idx) => {
+      const m = idx % 3;
+      if(m === 0) yellow.push(name);
+      if(m === 1) orange.push(name);
+      if(m === 2) purple.push(name);
     });
 
-    setDrawStatus("Gotowe. Każdy klika swoje okienko.");
+    // dla estetyki: sort w środku składu
+    yellow.sort((a,b)=>a.localeCompare(b,"pl"));
+    orange.sort((a,b)=>a.localeCompare(b,"pl"));
+    purple.sort((a,b)=>a.localeCompare(b,"pl"));
+
+    renderList(listYellow, yellow);
+    renderList(listOrange, orange);
+    renderList(listPurple, purple);
+
+    cYellow.textContent = yellow.length;
+    cOrange.textContent = orange.length;
+    cPurple.textContent = purple.length;
+
+    statusEl.textContent = "Wylosowano ✅";
+    reshuffleBtn.disabled = false;
+    copyBtn.disabled = false;
+
+    lastTeams = {yellow, orange, purple};
+    localStorage.setItem("players_simple", elPlayers.value);
+    localStorage.setItem("teams_simple", JSON.stringify(lastTeams));
+    return lastTeams;
   }
 
-  drawBtn.addEventListener("click", ()=>{
-    const names = sanitizeNames(elPlayers.value);
-    if(names.length<3){ setDrawStatus("Dodaj minimum 3 zawodników (po 1 w linii)."); return; }
-    assignments = assignTeams(names);
-    renderCards();
-    reshuffleBtn.disabled = false;
-    localStorage.setItem("players", elPlayers.value);
-  });
+  drawBtn.addEventListener("click", drawTeams);
+  reshuffleBtn.addEventListener("click", drawTeams);
 
-  reshuffleBtn.addEventListener("click", ()=>{
-    if(!assignments.length) return;
-    const names = assignments.map(a=>a.name);
-    assignments = assignTeams(names);
-    renderCards();
+  copyBtn.addEventListener("click", async ()=>{
+    if(!lastTeams){ statusEl.textContent = "Najpierw wylosuj składy."; return; }
+    const text =
+`Żółci (${lastTeams.yellow.length}):
+- ${lastTeams.yellow.join("\n- ")}
+
+Pomarańczowi (${lastTeams.orange.length}):
+- ${lastTeams.orange.join("\n- ")}
+
+Fioletowi (${lastTeams.purple.length}):
+- ${lastTeams.purple.join("\n- ")}`;
+    try{
+      await navigator.clipboard.writeText(text);
+      statusEl.textContent = "Składy skopiowane do schowka ✅";
+    }catch(e){
+      statusEl.textContent = "Nie mogę skopiować (ograniczenia przeglądarki). Zrób screenshot albo skopiuj ręcznie.";
+    }
   });
 
   resetBtn.addEventListener("click", ()=>{
-    assignments = [];
-    revealedCount = 0;
-    elCards.innerHTML = "";
-    teamsPreview.style.display = "none";
+    elPlayers.value = "";
+    listYellow.innerHTML = "";
+    listOrange.innerHTML = "";
+    listPurple.innerHTML = "";
+    cYellow.textContent = cOrange.textContent = cPurple.textContent = "0";
+    statusEl.textContent = "Wpisz zawodników i kliknij „Losuj równo”.";
     reshuffleBtn.disabled = true;
-    saveTeamsBtn.disabled = true;
-    updateCounter();
-    setDrawStatus("Wpisz zawodników i losuj.");
+    copyBtn.disabled = true;
+    lastTeams = null;
+    localStorage.removeItem("players_simple");
+    localStorage.removeItem("teams_simple");
   });
 
-  // --- WYNIKI & TABELA ---
-  const teamA = document.getElementById("teamA");
-  const teamB = document.getElementById("teamB");
-  const goalsA = document.getElementById("goalsA");
-  const goalsB = document.getElementById("goalsB");
-  const addMatchBtn = document.getElementById("addMatchBtn");
-  const undoBtn = document.getElementById("undoBtn");
-  const clearMatchesBtn = document.getElementById("clearMatchesBtn");
-  const statusRes = document.getElementById("statusRes");
-  const tableBody = document.getElementById("tableBody");
-  const matchesBody = document.getElementById("matchesBody");
-  const teamsHint = document.getElementById("teamsHint");
-
-  let matches = []; // {aKey,bKey,ga,gb}
-
-  function setResStatus(msg){ statusRes.textContent = msg; }
-
-  function loadSaved(){
-    const savedPlayers = localStorage.getItem("players");
-    if(savedPlayers) elPlayers.value = savedPlayers;
-
-    const savedTeams = localStorage.getItem("teams_last");
+  // load saved
+  (function(){
+    const saved = localStorage.getItem("players_simple");
+    if(saved) elPlayers.value = saved;
+    const savedTeams = localStorage.getItem("teams_simple");
     if(savedTeams){
-      // just for hint
-      teamsHint.textContent = "Masz zapisane składy z losowania. Wyniki liczą się niezależnie od składów (to tabela drużyn).";
-    } else {
-      teamsHint.textContent = "Tip: w zakładce Losowanie kliknij „Zapisz do tabeli”, żeby zachować składy na trening.";
+      try{
+        lastTeams = JSON.parse(savedTeams);
+        renderList(listYellow, lastTeams.yellow || []);
+        renderList(listOrange, lastTeams.orange || []);
+        renderList(listPurple, lastTeams.purple || []);
+        cYellow.textContent = (lastTeams.yellow||[]).length;
+        cOrange.textContent = (lastTeams.orange||[]).length;
+        cPurple.textContent = (lastTeams.purple||[]).length;
+        reshuffleBtn.disabled = false;
+        copyBtn.disabled = false;
+        statusEl.textContent = "Wczytano poprzednie losowanie ✅";
+      }catch{}
     }
-
-    const savedMatches = localStorage.getItem("matches");
-    if(savedMatches){
-      try { matches = JSON.parse(savedMatches) || []; } catch { matches=[]; }
-    }
-    fillTeamSelects();
-    renderAllTables();
-  }
-
-  function fillTeamSelects(){
-    const opts = TEAMS.map(t=>`<option value="${t.key}">${t.name}</option>`).join("");
-    teamA.innerHTML = opts;
-    teamB.innerHTML = opts;
-    teamA.value = "orange";
-    teamB.value = "purple";
-  }
-
-  function saveMatches(){
-    localStorage.setItem("matches", JSON.stringify(matches));
-    undoBtn.disabled = matches.length === 0;
-  }
-
-  function computeTable(){
-    const stats = {};
-    TEAMS.forEach(t=>{
-      stats[t.key] = { key:t.key, name:t.name, M:0,Z:0,R:0,P:0,GF:0,GA:0,Pkt:0 };
-    });
-
-    for(const m of matches){
-      const A = stats[m.aKey];
-      const B = stats[m.bKey];
-      A.M++; B.M++;
-      A.GF += m.ga; A.GA += m.gb;
-      B.GF += m.gb; B.GA += m.ga;
-
-      if(m.ga > m.gb){
-        A.Z++; B.P++; A.Pkt += 3;
-      } else if(m.ga < m.gb){
-        B.Z++; A.P++; B.Pkt += 3;
-      } else {
-        A.R++; B.R++; A.Pkt += 1; B.Pkt += 1;
-      }
-    }
-
-    const rows = Object.values(stats).map(s=>{
-      return {...s, GD: s.GF - s.GA, goals:`${s.GF}-${s.GA}`};
-    });
-
-    // sort: Pkt desc, GD desc, GF desc, name asc
-    rows.sort((x,y)=>{
-      if(y.Pkt !== x.Pkt) return y.Pkt - x.Pkt;
-      if(y.GD !== x.GD) return y.GD - x.GD;
-      if(y.GF !== x.GF) return y.GF - x.GF;
-      return x.name.localeCompare(y.name,"pl");
-    });
-
-    return rows;
-  }
-
-  function renderAllTables(){
-    // table
-    const rows = computeTable();
-    tableBody.innerHTML = "";
-    for(const r of rows){
-      tableBody.insertAdjacentHTML("beforeend", `
-        <tr>
-          <td><b>${escapeHtml(r.name)}</b></td>
-          <td>${r.M}</td><td>${r.Z}</td><td>${r.R}</td><td>${r.P}</td>
-          <td>${r.goals}</td><td>${r.GD}</td><td><b>${r.Pkt}</b></td>
-        </tr>
-      `);
-    }
-
-    // matches list
-    matchesBody.innerHTML = "";
-    matches.forEach((m,i)=>{
-      const A = teamByKey(m.aKey).name;
-      const B = teamByKey(m.bKey).name;
-      matchesBody.insertAdjacentHTML("beforeend", `
-        <tr>
-          <td>${i+1}</td>
-          <td>${escapeHtml(A)} – ${escapeHtml(B)}</td>
-          <td><b>${m.ga}:${m.gb}</b></td>
-        </tr>
-      `);
-    });
-
-    undoBtn.disabled = matches.length === 0;
-  }
-
-  addMatchBtn.addEventListener("click", ()=>{
-    const aKey = teamA.value;
-    const bKey = teamB.value;
-    const ga = Number(goalsA.value);
-    const gb = Number(goalsB.value);
-
-    if(aKey === bKey){ setResStatus("Wybierz dwie różne drużyny."); return; }
-    if(!Number.isFinite(ga) || !Number.isFinite(gb) || ga<0 || gb<0){ setResStatus("Podaj poprawne gole (0 lub więcej)."); return; }
-
-    matches.push({aKey,bKey,ga,gb});
-    goalsA.value = ""; goalsB.value = "";
-    setResStatus("Dodano wynik ✅");
-    saveMatches();
-    renderAllTables();
-  });
-
-  undoBtn.addEventListener("click", ()=>{
-    if(!matches.length) return;
-    matches.pop();
-    setResStatus("Cofnięto ostatni 
+  })();
+</script>
+</body>
+</html>
