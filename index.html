@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
-  <title>Trening – losowanie + turniej</title>
+  <title>Trening – losowanie + turniej + historia</title>
   <style>
     :root{
       --bg:#0b1220;
@@ -18,6 +18,9 @@
       --yellow:#ffd400;
       --orange:#ff7a00;
       --purple:#a855f7;
+      --blue:#3b82f6;
+      --red:#ef4444;
+      --green:#22c55e;
     }
     *{box-sizing:border-box}
     body{
@@ -102,6 +105,8 @@
       gap:12px;
     }
     @media(min-width:720px){.teams{grid-template-columns:repeat(3,1fr)}}
+    @media(min-width:980px){.teams{grid-template-columns:repeat(3,1fr)}}
+    @media(min-width:1100px){.teams{grid-template-columns:repeat(3,1fr)}}
 
     .teamCard{
       border:1px solid var(--border);
@@ -109,22 +114,29 @@
       background:rgba(0,0,0,.18);
       padding:12px;
       box-shadow:0 8px 18px rgba(0,0,0,.25);
-      min-height:260px;
+      min-height:240px;
     }
     .teamTitle{
       display:flex; align-items:center; gap:10px;
       font-weight:1000;
-      margin-bottom:10px;
+      margin-bottom:8px;
     }
     .dot{width:12px;height:12px;border-radius:99px;display:inline-block}
-    .dot.yellow{background:var(--yellow)}
-    .dot.orange{background:var(--orange)}
-    .dot.purple{background:var(--purple)}
     .count{margin-left:auto;color:var(--muted);font-size:12px;font-weight:800}
     .power{color:var(--muted);font-size:12px;font-weight:900}
 
     ul{margin:0;padding-left:18px}
     li{margin:6px 0}
+
+    select, input{
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:#0b1427;
+      color:var(--text);
+      padding:12px;
+      outline:none;
+      font-size:14px;
+    }
 
     /* Turniej */
     .box{
@@ -139,16 +151,6 @@
 
     .formRow{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
     @media(min-width:700px){.formRow{grid-template-columns: 1fr 1fr auto}}
-    input{
-      border-radius:14px;
-      border:1px solid var(--border);
-      background:#0b1427;
-      color:var(--text);
-      padding:12px;
-      outline:none;
-      font-size:14px;
-      width:100%;
-    }
 
     table{
       width:100%;
@@ -175,16 +177,31 @@
 
     .view{display:none}
     .view.show{display:block}
+
+    .histItem{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:rgba(0,0,0,.16);
+      padding:12px;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      justify-content:space-between;
+      margin-top:10px;
+    }
+    .histMeta{font-size:13px}
+    .histBtns{display:flex;gap:8px;flex-wrap:wrap}
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <h1>Trening – losowanie + turniej</h1>
-      <div class="sub">Losowanie składów (z balansem siły) + panel turniejowy (2 mecze i pauza dla każdej drużyny).</div>
+      <h1>Trening – losowanie + turniej + historia</h1>
+      <div class="sub">Losowanie z balansem siły (2–6 drużyn), turniej i zapis treningów.</div>
       <div class="tabs">
         <button class="tab active" id="tabDraw">Losowanie</button>
         <button class="tab" id="tabCup">Turniej</button>
+        <button class="tab" id="tabHist">Historia</button>
       </div>
     </header>
 
@@ -192,7 +209,20 @@
     <div id="viewDraw" class="view show">
       <div class="grid">
         <div class="panel">
-          <div style="font-weight:900;font-size:14px;margin-bottom:8px;">Zawodnicy (1 linia = 1 osoba)</div>
+          <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;">
+            <div style="font-weight:900;font-size:14px;">Zawodnicy (1 linia = 1 osoba)</div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <span style="font-size:12px;color:var(--muted);font-weight:900;">Ilość drużyn</span>
+              <select id="teamsCount">
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+              </select>
+            </div>
+          </div>
+
           <textarea id="players" placeholder="np.
 Tomek 5
 Kuba 4
@@ -215,32 +245,7 @@ Radek
         </div>
 
         <div class="panel">
-          <div class="teams">
-            <div class="teamCard">
-              <div class="teamTitle">
-                <span class="dot yellow"></span> Żółci
-                <span class="count" id="cYellow">0</span>
-              </div>
-              <div class="power" id="pYellow">Suma siły: 0</div>
-              <ul id="listYellow"></ul>
-            </div>
-            <div class="teamCard">
-              <div class="teamTitle">
-                <span class="dot orange"></span> Pomarańczowi
-                <span class="count" id="cOrange">0</span>
-              </div>
-              <div class="power" id="pOrange">Suma siły: 0</div>
-              <ul id="listOrange"></ul>
-            </div>
-            <div class="teamCard">
-              <div class="teamTitle">
-                <span class="dot purple"></span> Fioletowi
-                <span class="count" id="cPurple">0</span>
-              </div>
-              <div class="power" id="pPurple">Suma siły: 0</div>
-              <ul id="listPurple"></ul>
-            </div>
-          </div>
+          <div id="teamsGrid" class="teams"></div>
         </div>
       </div>
     </div>
@@ -252,9 +257,7 @@ Radek
           <div class="box">
             <p class="big" id="nextMatchTitle">Następny mecz: —</p>
             <div class="muted" id="restInfo">Pauza: —</div>
-            <div class="muted">
-              System: (Start–N1), (Start–N2), (N1–N2) → potem startuje N2. Każdy ma 2 mecze i 1 przerwy.
-            </div>
+            <div class="muted" id="modeInfo">Tryb: —</div>
           </div>
 
           <div class="formRow">
@@ -267,11 +270,14 @@ Radek
             <button id="nextBtn" class="secondary">Pokaż kolejny mecz</button>
             <button id="undoBtn" class="secondary" disabled>Cofnij ostatni</button>
             <button id="copyTableBtn" class="secondary">Kopiuj tabelę</button>
+            <button id="saveTrainingBtn" class="secondary">Zapisz trening</button>
             <button id="resetCupBtn" class="danger">Reset turnieju</button>
           </div>
 
           <div class="status" id="cupStatus">Dodaj wynik albo kliknij „Pokaż kolejny mecz”.</div>
-          <div class="small">Kopiuj tabelę = gotowy tekst do wklejenia na grupę.</div>
+          <div class="small">
+            Turniej bierze liczbę drużyn z Losowania. Dla 3 drużyn: system „2 mecze + pauza”. Dla 4–6: rotacja kolejką.
+          </div>
         </div>
 
         <div class="panel">
@@ -295,67 +301,101 @@ Radek
         </div>
       </div>
     </div>
+
+    <!-- HISTORIA -->
+    <div id="viewHist" class="view">
+      <div class="panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+          <div style="font-weight:1000;">Historia treningów</div>
+          <div class="row" style="margin-top:0;">
+            <button id="clearHistoryBtn" class="danger">Wyczyść historię</button>
+          </div>
+        </div>
+        <div class="small">Zapis przechowywany jest w pamięci przeglądarki (localStorage) na tym telefonie.</div>
+        <div id="historyList"></div>
+      </div>
+    </div>
   </div>
 
 <script>
-  // ---------- TABS ----------
-  const tabDraw = document.getElementById("tabDraw");
-  const tabCup  = document.getElementById("tabCup");
-  const viewDraw = document.getElementById("viewDraw");
-  const viewCup  = document.getElementById("viewCup");
-
-  function showTab(which){
-    const drawOn = which === "draw";
-    tabDraw.classList.toggle("active", drawOn);
-    tabCup.classList.toggle("active", !drawOn);
-    viewDraw.classList.toggle("show", drawOn);
-    viewCup.classList.toggle("show", !drawOn);
-  }
-  tabDraw.addEventListener("click", ()=>showTab("draw"));
-  tabCup.addEventListener("click", ()=>{ showTab("cup"); renderAll(); });
-
-  // ---------- CONST TEAMS ----------
-  const TEAMS = [
-    { key:"yellow", name:"Żółci" },
-    { key:"orange", name:"Pomarańczowi" },
-    { key:"purple", name:"Fioletowi" },
+  // ---------- TEAM THEMES ----------
+  // Pierwsze 3 jak chciałeś, reszta dodatkowe kolory.
+  const TEAM_THEMES = [
+    { key:"yellow", name:"Żółci",  colorVar:"--yellow" },
+    { key:"orange", name:"Pomarańczowi", colorVar:"--orange" },
+    { key:"purple", name:"Fioletowi", colorVar:"--purple" },
+    { key:"blue",   name:"Niebiescy", colorVar:"--blue" },
+    { key:"red",    name:"Czerwoni", colorVar:"--red" },
+    { key:"green",  name:"Zieloni", colorVar:"--green" },
   ];
-  const teamName = (key)=>TEAMS.find(t=>t.key===key)?.name || key;
 
   function escapeHtml(str){
     return str.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
               .replaceAll('"',"&quot;").replaceAll("'","&#039;");
   }
+  function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+  }
 
-  // ---------- LOSOWANIE (BALANS SIŁY) ----------
+  // ---------- TABS ----------
+  const tabDraw = document.getElementById("tabDraw");
+  const tabCup  = document.getElementById("tabCup");
+  const tabHist = document.getElementById("tabHist");
+  const viewDraw = document.getElementById("viewDraw");
+  const viewCup  = document.getElementById("viewCup");
+  const viewHist = document.getElementById("viewHist");
+
+  function showTab(which){
+    const drawOn = which === "draw";
+    const cupOn = which === "cup";
+    const histOn = which === "hist";
+
+    tabDraw.classList.toggle("active", drawOn);
+    tabCup.classList.toggle("active", cupOn);
+    tabHist.classList.toggle("active", histOn);
+
+    viewDraw.classList.toggle("show", drawOn);
+    viewCup.classList.toggle("show", cupOn);
+    viewHist.classList.toggle("show", histOn);
+
+    if(cupOn) renderAllCup();
+    if(histOn) renderHistory();
+  }
+  tabDraw.addEventListener("click", ()=>showTab("draw"));
+  tabCup.addEventListener("click", ()=>showTab("cup"));
+  tabHist.addEventListener("click", ()=>showTab("hist"));
+
+  // ---------- LOSOWANIE ----------
   const elPlayers = document.getElementById("players");
+  const teamsCountSel = document.getElementById("teamsCount");
   const drawBtn = document.getElementById("drawBtn");
   const reshuffleBtn = document.getElementById("reshuffleBtn");
   const copyTeamsBtn = document.getElementById("copyTeamsBtn");
   const resetBtn = document.getElementById("resetBtn");
   const statusEl = document.getElementById("status");
+  const teamsGrid = document.getElementById("teamsGrid");
 
-  const listYellow = document.getElementById("listYellow");
-  const listOrange = document.getElementById("listOrange");
-  const listPurple = document.getElementById("listPurple");
+  let lastTeams = null; // { teams:[{key,name,sum,players:[{name,power}]}], teamsCount, playersRaw }
 
-  const cYellow = document.getElementById("cYellow");
-  const cOrange = document.getElementById("cOrange");
-  const cPurple = document.getElementById("cPurple");
-
-  const pYellow = document.getElementById("pYellow");
-  const pOrange = document.getElementById("pOrange");
-  const pPurple = document.getElementById("pPurple");
-
-  let lastTeams = null; // {yellow:[{name,power}], orange:..., purple:...}
+  function getTeamsConfig(){
+    const n = Number(teamsCountSel.value);
+    const teams = TEAM_THEMES.slice(0, n).map((t, idx)=>({
+      idx,
+      key: t.key,
+      name: t.name,
+      colorVar: t.colorVar
+    }));
+    return { n, teams };
+  }
 
   function parsePlayers(raw){
     const lines = raw.split("\n").map(s=>s.trim()).filter(Boolean);
-
-    // normalize duplicates by name (keep highest power)
     const map = new Map();
     for(const line of lines){
-      // take last token if numeric
       const parts = line.split(/\s+/).filter(Boolean);
       let power = 3;
       if(parts.length >= 2){
@@ -368,7 +408,6 @@ Radek
       }
       const name = parts.join(" ").trim();
       if(!name) continue;
-
       if(!map.has(name) || map.get(name).power < power){
         map.set(name, {name, power});
       }
@@ -376,107 +415,91 @@ Radek
     return Array.from(map.values());
   }
 
-  function shuffle(arr){
-    for(let i=arr.length-1;i>0;i--){
-      const j=Math.floor(Math.random()*(i+1));
-      [arr[i],arr[j]]=[arr[j],arr[i]];
-    }
-    return arr;
-  }
-
-  // Greedy balance:
-  // 1) sort by power desc
-  // 2) assign each player to team with smallest sum power
-  function balanceTeams(players){
+  // Greedy balance for N teams:
+  // sort by power desc, assign each player to team with smallest sum (then smallest size)
+  function balanceTeams(players, teams){
     const shuffled = shuffle([...players]);
     shuffled.sort((a,b)=>b.power - a.power);
 
-    const teams = {
-      yellow: { players: [], sum: 0 },
-      orange: { players: [], sum: 0 },
-      purple: { players: [], sum: 0 }
-    };
-    const keys = ["yellow","orange","purple"];
+    const buckets = teams.map(t=>({ ...t, sum:0, players:[] }));
 
     for(const p of shuffled){
-      keys.sort((k1,k2)=>{
-        if(teams[k1].sum !== teams[k2].sum) return teams[k1].sum - teams[k2].sum;
-        if(teams[k1].players.length !== teams[k2].players.length) return teams[k1].players.length - teams[k2].players.length;
+      buckets.sort((A,B)=>{
+        if(A.sum !== B.sum) return A.sum - B.sum;
+        if(A.players.length !== B.players.length) return A.players.length - B.players.length;
         return Math.random() - 0.5;
       });
-      const k = keys[0];
-      teams[k].players.push(p);
-      teams[k].sum += p.power;
+      buckets[0].players.push(p);
+      buckets[0].sum += p.power;
     }
-
-    // sort names for display
-    for(const k of keys){
-      teams[k].players.sort((a,b)=>a.name.localeCompare(b.name,"pl"));
+    // sort players by name for display
+    for(const b of buckets){
+      b.players.sort((a,b)=>a.name.localeCompare(b.name,"pl"));
     }
-    return teams;
+    // restore original team order (idx)
+    buckets.sort((a,b)=>a.idx - b.idx);
+    return buckets;
   }
 
-  function renderTeamList(ul, players){
-    ul.innerHTML = players.map(p => `<li>${escapeHtml(p.name)} <span style="color:var(--muted);font-weight:900;">(${p.power})</span></li>`).join("");
+  function renderTeamsCards(teamsBuckets){
+    teamsGrid.innerHTML = "";
+    for(const t of teamsBuckets){
+      const card = document.createElement("div");
+      card.className = "teamCard";
+      card.innerHTML = `
+        <div class="teamTitle">
+          <span class="dot" style="background:var(${t.colorVar})"></span>
+          ${escapeHtml(t.name)}
+          <span class="count">${t.players.length}</span>
+        </div>
+        <div class="power">Suma siły: ${t.sum}</div>
+        <ul>${t.players.map(p=>`<li>${escapeHtml(p.name)} <span style="color:var(--muted);font-weight:900;">(${p.power})</span></li>`).join("")}</ul>
+      `;
+      teamsGrid.appendChild(card);
+    }
   }
 
-  function drawTeams(){
+  function doDraw(){
     const players = parsePlayers(elPlayers.value);
-    if(players.length < 3){
-      statusEl.textContent = "Dodaj minimum 3 zawodników (po 1 w linii).";
-      return null;
+    const { n, teams } = getTeamsConfig();
+    if(players.length < n){
+      statusEl.textContent = `Dodaj minimum ${n} zawodników (1 na drużynę).`;
+      return;
     }
-    const t = balanceTeams(players);
+    const buckets = balanceTeams(players, teams);
+    lastTeams = { teams: buckets, teamsCount:n, playersRaw: elPlayers.value };
 
-    renderTeamList(listYellow, t.yellow.players);
-    renderTeamList(listOrange, t.orange.players);
-    renderTeamList(listPurple, t.purple.players);
-
-    cYellow.textContent = t.yellow.players.length;
-    cOrange.textContent = t.orange.players.length;
-    cPurple.textContent = t.purple.players.length;
-
-    pYellow.textContent = `Suma siły: ${t.yellow.sum}`;
-    pOrange.textContent = `Suma siły: ${t.orange.sum}`;
-    pPurple.textContent = `Suma siły: ${t.purple.sum}`;
-
-    lastTeams = {
-      yellow: t.yellow.players,
-      orange: t.orange.players,
-      purple: t.purple.players,
-      sums: { yellow: t.yellow.sum, orange: t.orange.sum, purple: t.purple.sum }
-    };
-
+    renderTeamsCards(buckets);
+    statusEl.textContent = "Wylosowano i wyrównano ✅";
     reshuffleBtn.disabled = false;
     copyTeamsBtn.disabled = false;
-    statusEl.textContent = "Wylosowano i wyrównano ✅";
 
-    localStorage.setItem("players_balanced", elPlayers.value);
-    localStorage.setItem("teams_balanced", JSON.stringify(lastTeams));
-    return lastTeams;
+    localStorage.setItem("players_balanced_v2", elPlayers.value);
+    localStorage.setItem("teams_count_v2", String(n));
+    localStorage.setItem("teams_balanced_v2", JSON.stringify(lastTeams));
+
+    // turniej też zależy od liczby drużyn – jeśli zmieniłeś N, to resetujemy stan kolejki (żeby nie mieszać)
+    ensureCupConsistency(true);
   }
 
-  drawBtn.addEventListener("click", drawTeams);
-  reshuffleBtn.addEventListener("click", drawTeams);
+  drawBtn.addEventListener("click", doDraw);
+  reshuffleBtn.addEventListener("click", doDraw);
 
   copyTeamsBtn.addEventListener("click", async ()=>{
     if(!lastTeams){ statusEl.textContent = "Najpierw wylosuj składy."; return; }
-
-    const fmt = (arr)=>arr.map(p=>`- ${p.name} (${p.power})`).join("\n");
-    const text =
-`SKŁADY – trening
-Żółci (suma ${lastTeams.sums.yellow} | ${lastTeams.yellow.length}):
-${fmt(lastTeams.yellow)}
-
-Pomarańczowi (suma ${lastTeams.sums.orange} | ${lastTeams.orange.length}):
-${fmt(lastTeams.orange)}
-
-Fioletowi (suma ${lastTeams.sums.purple} | ${lastTeams.purple.length}):
-${fmt(lastTeams.purple)}`;
-
+    const lines = [];
+    lines.push("SKŁADY – trening");
+    for(const t of lastTeams.teams){
+      lines.push(`${t.name} (suma ${t.sum} | ${t.players.length}):`);
+      for(const p of t.players){
+        lines.push(`- ${p.name} (${p.power})`);
+      }
+      lines.push("");
+    }
+    const text = lines.join("\n").trim();
     try{
       await navigator.clipboard.writeText(text);
-      statusEl.textContent = "Składy skopiowane do schowka ✅";
+      statusEl.textContent = "Składy skopiowane ✅";
     }catch{
       statusEl.textContent = "Nie mogę skopiować (ograniczenia przeglądarki).";
     }
@@ -484,102 +507,156 @@ ${fmt(lastTeams.purple)}`;
 
   resetBtn.addEventListener("click", ()=>{
     elPlayers.value = "";
-    listYellow.innerHTML = "";
-    listOrange.innerHTML = "";
-    listPurple.innerHTML = "";
-    cYellow.textContent = cOrange.textContent = cPurple.textContent = "0";
-    pYellow.textContent = pOrange.textContent = pPurple.textContent = "Suma siły: 0";
+    teamsGrid.innerHTML = "";
     statusEl.textContent = "Wpisz zawodników i kliknij „Losuj (balans siły)”.";
     reshuffleBtn.disabled = true;
     copyTeamsBtn.disabled = true;
     lastTeams = null;
-    localStorage.removeItem("players_balanced");
-    localStorage.removeItem("teams_balanced");
+
+    localStorage.removeItem("players_balanced_v2");
+    localStorage.removeItem("teams_balanced_v2");
+    // nie kasujemy history, ale resetujemy turniej
+    resetCup();
   });
 
-  // ---------- TURNIEJ: 2 MECZE + PAUZA ----------
+  teamsCountSel.addEventListener("change", ()=>{
+    localStorage.setItem("teams_count_v2", teamsCountSel.value);
+    // zmiana liczby drużyn wpływa na turniej – resetujemy bieżącą logikę
+    resetCup();
+    // a jeśli są już składy, przelicz losowanie jeszcze raz (żeby było równo dla nowej liczby)
+    if(elPlayers.value.trim()) doDraw();
+  });
+
+  // ---------- TURNIEJ ----------
   const nextMatchTitle = document.getElementById("nextMatchTitle");
   const restInfo = document.getElementById("restInfo");
+  const modeInfo = document.getElementById("modeInfo");
   const cupStatus = document.getElementById("cupStatus");
   const nextBtn = document.getElementById("nextBtn");
   const addResultBtn = document.getElementById("addResultBtn");
   const undoBtn = document.getElementById("undoBtn");
   const resetCupBtn = document.getElementById("resetCupBtn");
   const copyTableBtn = document.getElementById("copyTableBtn");
+  const saveTrainingBtn = document.getElementById("saveTrainingBtn");
   const gA = document.getElementById("gA");
   const gB = document.getElementById("gB");
   const tableBody = document.getElementById("tableBody");
   const matchesBody = document.getElementById("matchesBody");
 
+  // cupState działa dla N drużyn:
+  // mode "block3" => Twoje 2 mecze + pauza (tylko gdy N=3)
+  // mode "queue"  => kolejka (N>=2)
   let cupState = {
-    starterIdx: 2,    // start: Fiolet
-    stepInBlock: 0,   // 0..2
-    currentMatch: null,
-    matches: []       // {homeKey, awayKey, restKey, gh, ga}
+    teamsCount: 3,
+    mode: "block3",
+    // block3
+    starterIdx: 2,
+    stepInBlock: 0,
+    // queue
+    queueIdx: 0,
+    // common
+    currentMatch: null, // {homeIdx, awayIdx, restIdxs:[]}
+    matches: [] // {homeIdx, awayIdx, restIdxs, gh, ga}
   };
 
-  function saveCup(){ localStorage.setItem("cup_state_v1", JSON.stringify(cupState)); }
+  function getCupTeams(){
+    const { n, teams } = getTeamsConfig();
+    // w turnieju nazwy bierzemy z TEAM_THEMES
+    return { n, teams };
+  }
+
+  function saveCup(){ localStorage.setItem("cup_state_v2", JSON.stringify(cupState)); }
   function loadCup(){
-    const s = localStorage.getItem("cup_state_v1");
+    const s = localStorage.getItem("cup_state_v2");
     if(!s) return;
     try{
       const parsed = JSON.parse(s);
-      if(parsed && typeof parsed.starterIdx==="number") cupState = parsed;
+      if(parsed && typeof parsed.teamsCount==="number") cupState = parsed;
     }catch{}
   }
 
-  function buildMatchFromState(){
-    const i = ((cupState.starterIdx % 3) + 3) % 3;
-    const n1 = (i + 1) % 3;
-    const n2 = (i + 2) % 3;
+  function teamLabelByIdx(idx){
+    const { teams } = getCupTeams();
+    return teams[idx]?.name ?? `Drużyna ${idx+1}`;
+  }
 
-    let homeIdx, awayIdx, restIdx;
-    if(cupState.stepInBlock === 0){
-      homeIdx = i;   awayIdx = n1;  restIdx = n2;
-    } else if(cupState.stepInBlock === 1){
-      homeIdx = i;   awayIdx = n2;  restIdx = n1;
-    } else {
-      homeIdx = n1;  awayIdx = n2;  restIdx = i;
+  function ensureCupConsistency(forceReset=false){
+    const { n } = getCupTeams();
+    if(forceReset || cupState.teamsCount !== n){
+      resetCup();
     }
-
-    const homeKey = TEAMS[homeIdx].key;
-    const awayKey = TEAMS[awayIdx].key;
-    const restKey = TEAMS[restIdx].key;
-    cupState.currentMatch = {homeKey, awayKey, restKey};
   }
 
-  function prettyMatch(m){
-    return `${teamName(m.homeKey)} – ${teamName(m.awayKey)}`;
-  }
+  function buildMatch(){
+    const { n } = getCupTeams();
+    cupState.teamsCount = n;
+    cupState.mode = (n === 3) ? "block3" : "queue";
 
-  function showCurrentMatch(){
-    if(!cupState.currentMatch) buildMatchFromState();
-    nextMatchTitle.textContent = `Następny mecz: ${prettyMatch(cupState.currentMatch)}`;
-    restInfo.textContent = `Pauza: ${teamName(cupState.currentMatch.restKey)}`;
-    undoBtn.disabled = cupState.matches.length === 0;
+    if(cupState.mode === "block3"){
+      // block: (S vs N1), (S vs N2), (N1 vs N2) and starter becomes N2
+      const i = ((cupState.starterIdx % 3) + 3) % 3;
+      const n1 = (i + 1) % 3;
+      const n2 = (i + 2) % 3;
+
+      let homeIdx, awayIdx, restIdxs;
+      if(cupState.stepInBlock === 0){
+        homeIdx = i; awayIdx = n1; restIdxs = [n2];
+      } else if(cupState.stepInBlock === 1){
+        homeIdx = i; awayIdx = n2; restIdxs = [n1];
+      } else {
+        homeIdx = n1; awayIdx = n2; restIdxs = [i];
+      }
+      cupState.currentMatch = { homeIdx, awayIdx, restIdxs };
+      modeInfo.textContent = "Tryb: 3 drużyny – 2 mecze + pauza ✅";
+    } else {
+      // queue rotation: i vs i+1, rest = others, then i++.
+      const i = ((cupState.queueIdx % n) + n) % n;
+      const homeIdx = i;
+      const awayIdx = (i + 1) % n;
+      const restIdxs = [];
+      for(let k=0;k<n;k++){
+        if(k !== homeIdx && k !== awayIdx) restIdxs.push(k);
+      }
+      cupState.currentMatch = { homeIdx, awayIdx, restIdxs };
+      modeInfo.textContent = `Tryb: ${n} drużyn – rotacja kolejką ✅`;
+    }
     saveCup();
   }
 
+  function showMatch(){
+    if(!cupState.currentMatch) buildMatch();
+    const m = cupState.currentMatch;
+    nextMatchTitle.textContent = `Następny mecz: ${teamLabelByIdx(m.homeIdx)} – ${teamLabelByIdx(m.awayIdx)}`;
+    const restText = m.restIdxs.length ? m.restIdxs.map(teamLabelByIdx).join(", ") : "—";
+    restInfo.textContent = `Pauza: ${restText}`;
+    undoBtn.disabled = cupState.matches.length === 0;
+  }
+
   function advanceMatch(){
-    cupState.stepInBlock++;
-    if(cupState.stepInBlock > 2){
-      cupState.stepInBlock = 0;
-      cupState.starterIdx = (cupState.starterIdx + 2) % 3;
+    if(cupState.mode === "block3"){
+      cupState.stepInBlock++;
+      if(cupState.stepInBlock > 2){
+        cupState.stepInBlock = 0;
+        cupState.starterIdx = (cupState.starterIdx + 2) % 3;
+      }
+    } else {
+      const { n } = getCupTeams();
+      cupState.queueIdx = (cupState.queueIdx + 1) % n;
     }
-    buildMatchFromState();
-    showCurrentMatch();
+    buildMatch();
+    showMatch();
     cupStatus.textContent = "Ustawiono kolejny mecz ✅";
   }
 
   function computeTable(){
-    const stats = {};
-    TEAMS.forEach(t=>{
-      stats[t.key] = { key:t.key, name:t.name, M:0,Z:0,R:0,P:0,GF:0,GA:0,Pkt:0 };
-    });
+    const { n } = getCupTeams();
+    const stats = Array.from({length:n}, (_,i)=>({
+      idx:i, name: teamLabelByIdx(i), M:0,Z:0,R:0,P:0,GF:0,GA:0,Pkt:0
+    }));
 
     for(const m of cupState.matches){
-      const H = stats[m.homeKey];
-      const A = stats[m.awayKey];
+      const H = stats[m.homeIdx];
+      const A = stats[m.awayIdx];
       H.M++; A.M++;
       H.GF += m.gh; H.GA += m.ga;
       A.GF += m.ga; A.GA += m.gh;
@@ -588,8 +665,7 @@ ${fmt(lastTeams.purple)}`;
       else if(m.gh < m.ga){ A.Z++; H.P++; A.Pkt += 3; }
       else { H.R++; A.R++; H.Pkt += 1; A.Pkt += 1; }
     }
-
-    const rows = Object.values(stats).map(s=>({...s, GD: s.GF - s.GA, goals:`${s.GF}-${s.GA}`}));
+    const rows = stats.map(s=>({...s, GD:s.GF-s.GA, goals:`${s.GF}-${s.GA}`}));
     rows.sort((x,y)=>{
       if(y.Pkt !== x.Pkt) return y.Pkt - x.Pkt;
       if(y.GD !== x.GD) return y.GD - x.GD;
@@ -599,8 +675,9 @@ ${fmt(lastTeams.purple)}`;
     return rows;
   }
 
-  function renderAll(){
-    showCurrentMatch();
+  function renderAllCup(){
+    ensureCupConsistency(false);
+    showMatch();
 
     const rows = computeTable();
     tableBody.innerHTML = "";
@@ -616,12 +693,13 @@ ${fmt(lastTeams.purple)}`;
 
     matchesBody.innerHTML = "";
     cupState.matches.forEach((m, idx)=>{
+      const restText = m.restIdxs.length ? m.restIdxs.map(teamLabelByIdx).join(", ") : "—";
       matchesBody.insertAdjacentHTML("beforeend", `
         <tr>
           <td>${idx+1}</td>
-          <td>${escapeHtml(teamName(m.homeKey))} – ${escapeHtml(teamName(m.awayKey))}</td>
+          <td>${escapeHtml(teamLabelByIdx(m.homeIdx))} – ${escapeHtml(teamLabelByIdx(m.awayIdx))}</td>
           <td><b>${m.gh}:${m.ga}</b></td>
-          <td>${escapeHtml(teamName(m.restKey))}</td>
+          <td>${escapeHtml(restText)}</td>
         </tr>
       `);
     });
@@ -631,12 +709,11 @@ ${fmt(lastTeams.purple)}`;
 
   nextBtn.addEventListener("click", ()=>{
     advanceMatch();
-    renderAll();
+    renderAllCup();
   });
 
   addResultBtn.addEventListener("click", ()=>{
-    if(!cupState.currentMatch) buildMatchFromState();
-
+    if(!cupState.currentMatch) buildMatch();
     const gh = Number(gA.value);
     const ga = Number(gB.value);
     if(!Number.isFinite(gh) || !Number.isFinite(ga) || gh<0 || ga<0){
@@ -644,65 +721,59 @@ ${fmt(lastTeams.purple)}`;
       return;
     }
 
-    cupState.matches.push({
-      homeKey: cupState.currentMatch.homeKey,
-      awayKey: cupState.currentMatch.awayKey,
-      restKey: cupState.currentMatch.restKey,
-      gh, ga
-    });
+    const m = cupState.currentMatch;
+    cupState.matches.push({ homeIdx:m.homeIdx, awayIdx:m.awayIdx, restIdxs:[...m.restIdxs], gh, ga });
     gA.value = ""; gB.value = "";
     cupStatus.textContent = "Dodano wynik ✅";
 
     advanceMatch();
-    renderAll();
+    renderAllCup();
     saveCup();
   });
 
   undoBtn.addEventListener("click", ()=>{
     if(!cupState.matches.length) return;
     cupState.matches.pop();
-
-    // reset + odtworzenie stanu na podstawie liczby spotkań
-    const played = cupState.matches.length;
-    cupState.starterIdx = 2; // start: fiolet
-    cupState.stepInBlock = 0;
-    cupState.currentMatch = null;
-
-    buildMatchFromState();
-    for(let i=0;i<played;i++){
-      cupState.stepInBlock++;
-      if(cupState.stepInBlock > 2){
-        cupState.stepInBlock = 0;
-        cupState.starterIdx = (cupState.starterIdx + 2) % 3;
-      }
-    }
-    buildMatchFromState();
     cupStatus.textContent = "Cofnięto ostatni wynik.";
     saveCup();
-    renderAll();
+    renderAllCup();
   });
 
+  function resetCup(){
+    const { n } = getCupTeams();
+    cupState = {
+      teamsCount: n,
+      mode: (n===3) ? "block3" : "queue",
+      starterIdx: 2,
+      stepInBlock: 0,
+      queueIdx: 0,
+      currentMatch: null,
+      matches: []
+    };
+    localStorage.setItem("cup_state_v2", JSON.stringify(cupState));
+    buildMatch();
+    renderAllCup();
+  }
+
   resetCupBtn.addEventListener("click", ()=>{
-    cupState = { starterIdx: 2, stepInBlock: 0, currentMatch: null, matches: [] };
-    localStorage.removeItem("cup_state_v1");
+    resetCup();
     cupStatus.textContent = "Reset turnieju ✅";
-    buildMatchFromState();
-    renderAll();
   });
 
   copyTableBtn.addEventListener("click", async ()=>{
     const rows = computeTable();
-    const lines = rows.map((r, i)=>
+    const tableLines = rows.map((r,i)=>
       `${i+1}. ${r.name} | M:${r.M} Z:${r.Z} R:${r.R} P:${r.P} | ${r.goals} (${r.GD}) | Pkt:${r.Pkt}`
     ).join("\n");
 
-    const matchesLines = cupState.matches.map((m,i)=>
-      `${i+1}) ${teamName(m.homeKey)} – ${teamName(m.awayKey)} ${m.gh}:${m.ga} (pauza: ${teamName(m.restKey)})`
-    ).join("\n");
+    const matchesLines = cupState.matches.map((m,i)=>{
+      const restText = m.restIdxs.length ? m.restIdxs.map(teamLabelByIdx).join(", ") : "—";
+      return `${i+1}) ${teamLabelByIdx(m.homeIdx)} – ${teamLabelByIdx(m.awayIdx)} ${m.gh}:${m.ga} (pauza: ${restText})`;
+    }).join("\n");
 
     const text =
 `TABELA – trening
-${lines}
+${tableLines}
 
 MECZE:
 ${matchesLines || "(brak)"}`;
@@ -715,42 +786,157 @@ ${matchesLines || "(brak)"}`;
     }
   });
 
-  // init cup
-  loadCup();
-  buildMatchFromState();
-  renderAll();
+  // ---------- HISTORIA ----------
+  const historyList = document.getElementById("historyList");
+  const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
-  // init draw saved
-  (function(){
-    const saved = localStorage.getItem("players_balanced");
-    if(saved) elPlayers.value = saved;
+  function loadHistory(){
+    const raw = localStorage.getItem("training_history_v1");
+    if(!raw) return [];
+    try{ return JSON.parse(raw) || []; }catch{ return []; }
+  }
+  function saveHistory(list){
+    localStorage.setItem("training_history_v1", JSON.stringify(list));
+  }
+  function nowStamp(){
+    const d = new Date();
+    const pad = (x)=>String(x).padStart(2,"0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  function uuid(){
+    return Math.random().toString(16).slice(2) + "-" + Date.now().toString(16);
+  }
 
-    const savedTeams = localStorage.getItem("teams_balanced");
+  saveTrainingBtn.addEventListener("click", ()=>{
+    const { n } = getTeamsConfig();
+    const history = loadHistory();
+    const entry = {
+      id: uuid(),
+      ts: nowStamp(),
+      teamsCount: n,
+      playersRaw: elPlayers.value || "",
+      teamsSnapshot: lastTeams,
+      cupSnapshot: cupState
+    };
+    history.unshift(entry);
+    saveHistory(history);
+    cupStatus.textContent = "Zapisano trening do historii ✅";
+  });
+
+  function renderHistory(){
+    const history = loadHistory();
+    historyList.innerHTML = "";
+
+    if(history.length === 0){
+      historyList.innerHTML = `<div class="small" style="margin-top:10px;">Brak zapisanych treningów.</div>`;
+      return;
+    }
+
+    for(const h of history){
+      const matchesCount = h.cupSnapshot?.matches?.length ?? 0;
+      const div = document.createElement("div");
+      div.className = "histItem";
+      div.innerHTML = `
+        <div class="histMeta">
+          <div style="font-weight:1000;">${escapeHtml(h.ts)}</div>
+          <div class="small">Drużyn: <b>${h.teamsCount}</b> • Meczy: <b>${matchesCount}</b></div>
+        </div>
+        <div class="histBtns">
+          <button class="secondary" data-act="load" data-id="${h.id}">Wczytaj</button>
+          <button class="danger" data-act="del" data-id="${h.id}">Usuń</button>
+        </div>
+      `;
+      historyList.appendChild(div);
+    }
+
+    historyList.querySelectorAll("button").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const id = btn.dataset.id;
+        const act = btn.dataset.act;
+        let history = loadHistory();
+
+        if(act === "del"){
+          history = history.filter(x=>x.id !== id);
+          saveHistory(history);
+          renderHistory();
+          return;
+        }
+
+        if(act === "load"){
+          const entry = history.find(x=>x.id === id);
+          if(!entry) return;
+
+          // restore
+          teamsCountSel.value = String(entry.teamsCount || 3);
+          elPlayers.value = entry.playersRaw || "";
+
+          // restore teams snapshot (optional)
+          if(entry.teamsSnapshot && entry.teamsSnapshot.teams){
+            lastTeams = entry.teamsSnapshot;
+            renderTeamsCards(lastTeams.teams);
+            reshuffleBtn.disabled = false;
+            copyTeamsBtn.disabled = false;
+            statusEl.textContent = "Wczytano losowanie z historii ✅";
+          } else {
+            lastTeams = null;
+            teamsGrid.innerHTML = "";
+            reshuffleBtn.disabled = true;
+            copyTeamsBtn.disabled = true;
+          }
+
+          // restore cup snapshot
+          if(entry.cupSnapshot){
+            cupState = entry.cupSnapshot;
+            saveCup();
+            renderAllCup();
+          } else {
+            resetCup();
+          }
+
+          // persist base settings
+          localStorage.setItem("players_balanced_v2", elPlayers.value);
+          localStorage.setItem("teams_count_v2", String(entry.teamsCount || 3));
+          localStorage.setItem("teams_balanced_v2", JSON.stringify(lastTeams || null));
+
+          showTab("cup");
+        }
+      });
+    });
+  }
+
+  clearHistoryBtn.addEventListener("click", ()=>{
+    localStorage.removeItem("training_history_v1");
+    renderHistory();
+  });
+
+  // ---------- INIT ----------
+  (function init(){
+    // restore settings
+    const savedCount = localStorage.getItem("teams_count_v2");
+    if(savedCount) teamsCountSel.value = savedCount;
+
+    const savedPlayers = localStorage.getItem("players_balanced_v2");
+    if(savedPlayers) elPlayers.value = savedPlayers;
+
+    const savedTeams = localStorage.getItem("teams_balanced_v2");
     if(savedTeams){
       try{
-        lastTeams = JSON.parse(savedTeams);
-        const y = lastTeams.yellow || [];
-        const o = lastTeams.orange || [];
-        const p = lastTeams.purple || [];
-        renderTeamList(listYellow, y);
-        renderTeamList(listOrange, o);
-        renderTeamList(listPurple, p);
-        cYellow.textContent = y.length;
-        cOrange.textContent = o.length;
-        cPurple.textContent = p.length;
-        pYellow.textContent = `Suma siły: ${lastTeams.sums?.yellow ?? 0}`;
-        pOrange.textContent = `Suma siły: ${lastTeams.sums?.orange ?? 0}`;
-        pPurple.textContent = `Suma siły: ${lastTeams.sums?.purple ?? 0}`;
-        reshuffleBtn.disabled = false;
-        copyTeamsBtn.disabled = false;
-        statusEl.textContent = "Wczytano poprzednie losowanie ✅";
+        const t = JSON.parse(savedTeams);
+        if(t && t.teams){
+          lastTeams = t;
+          renderTeamsCards(t.teams);
+          reshuffleBtn.disabled = false;
+          copyTeamsBtn.disabled = false;
+          statusEl.textContent = "Wczytano poprzednie losowanie ✅";
+        }
       }catch{}
     }
-  })();
 
-  function renderTeamList(ul, players){
-    ul.innerHTML = (players||[]).map(p => `<li>${escapeHtml(p.name)} <span style="color:var(--muted);font-weight:900;">(${p.power})</span></li>`).join("");
-  }
+    loadCup();
+    ensureCupConsistency(true);
+    buildMatch();
+    renderAllCup();
+  })();
 </script>
 </body>
 </html>
