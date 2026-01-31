@@ -67,7 +67,7 @@
     }
 
     textarea{
-      width:100%; min-height:200px; resize:vertical;
+      width:100%; min-height:220px; resize:vertical;
       border-radius:14px;
       border:1px solid var(--border);
       background:#0b1427;
@@ -109,7 +109,7 @@
       background:rgba(0,0,0,.18);
       padding:12px;
       box-shadow:0 8px 18px rgba(0,0,0,.25);
-      min-height:240px;
+      min-height:260px;
     }
     .teamTitle{
       display:flex; align-items:center; gap:10px;
@@ -121,6 +121,7 @@
     .dot.orange{background:var(--orange)}
     .dot.purple{background:var(--purple)}
     .count{margin-left:auto;color:var(--muted);font-size:12px;font-weight:800}
+    .power{color:var(--muted);font-size:12px;font-weight:900}
 
     ul{margin:0;padding-left:18px}
     li{margin:6px 0}
@@ -133,12 +134,9 @@
       padding:12px;
       box-shadow:0 8px 18px rgba(0,0,0,.25);
     }
-    .big{
-      font-size:18px;
-      font-weight:1000;
-      margin:0;
-    }
+    .big{font-size:18px;font-weight:1000;margin:0}
     .muted{color:var(--muted); font-size:13px; margin-top:6px}
+
     .formRow{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
     @media(min-width:700px){.formRow{grid-template-columns: 1fr 1fr auto}}
     input{
@@ -183,7 +181,7 @@
   <div class="wrap">
     <header>
       <h1>Trening – losowanie + turniej</h1>
-      <div class="sub">Losowanie składów + panel turniejowy (system: 2 mecze i pauza dla każdej drużyny).</div>
+      <div class="sub">Losowanie składów (z balansem siły) + panel turniejowy (2 mecze i pauza dla każdej drużyny).</div>
       <div class="tabs">
         <button class="tab active" id="tabDraw">Losowanie</button>
         <button class="tab" id="tabCup">Turniej</button>
@@ -196,35 +194,50 @@
         <div class="panel">
           <div style="font-weight:900;font-size:14px;margin-bottom:8px;">Zawodnicy (1 linia = 1 osoba)</div>
           <textarea id="players" placeholder="np.
-Tomek
-Kuba
-Mati
-Bartek
+Tomek 5
+Kuba 4
+Mati 3
+Bartek 2
+Radek
 ..."></textarea>
 
           <div class="row">
-            <button id="drawBtn">Losuj równo</button>
+            <button id="drawBtn">Losuj (balans siły)</button>
             <button id="reshuffleBtn" class="secondary" disabled>Losuj jeszcze raz</button>
-            <button id="copyBtn" class="secondary" disabled>Kopiuj składy</button>
+            <button id="copyTeamsBtn" class="secondary" disabled>Kopiuj składy</button>
             <button id="resetBtn" class="danger">Reset</button>
           </div>
 
-          <div class="status" id="status">Wpisz zawodników i kliknij „Losuj równo”.</div>
-          <div class="small">Rozdział: po wymieszaniu listy idą po kolei do 3 drużyn (różnica max 1).</div>
+          <div class="status" id="status">Wpisz zawodników i kliknij „Losuj (balans siły)”.</div>
+          <div class="small">
+            Format: <b>Imię [spacja] liczba</b>. Bez liczby = siła 3. (np. „Tomek 5”, „Radek”).
+          </div>
         </div>
 
         <div class="panel">
           <div class="teams">
             <div class="teamCard">
-              <div class="teamTitle"><span class="dot yellow"></span> Żółci <span class="count" id="cYellow">0</span></div>
+              <div class="teamTitle">
+                <span class="dot yellow"></span> Żółci
+                <span class="count" id="cYellow">0</span>
+              </div>
+              <div class="power" id="pYellow">Suma siły: 0</div>
               <ul id="listYellow"></ul>
             </div>
             <div class="teamCard">
-              <div class="teamTitle"><span class="dot orange"></span> Pomarańczowi <span class="count" id="cOrange">0</span></div>
+              <div class="teamTitle">
+                <span class="dot orange"></span> Pomarańczowi
+                <span class="count" id="cOrange">0</span>
+              </div>
+              <div class="power" id="pOrange">Suma siły: 0</div>
               <ul id="listOrange"></ul>
             </div>
             <div class="teamCard">
-              <div class="teamTitle"><span class="dot purple"></span> Fioletowi <span class="count" id="cPurple">0</span></div>
+              <div class="teamTitle">
+                <span class="dot purple"></span> Fioletowi
+                <span class="count" id="cPurple">0</span>
+              </div>
+              <div class="power" id="pPurple">Suma siły: 0</div>
               <ul id="listPurple"></ul>
             </div>
           </div>
@@ -239,8 +252,8 @@ Bartek
           <div class="box">
             <p class="big" id="nextMatchTitle">Następny mecz: —</p>
             <div class="muted" id="restInfo">Pauza: —</div>
-            <div class="muted" id="systemInfo">
-              System: (A–B), (A–C), (B–C) → potem startuje C. Każdy ma 2 mecze i 1 przerwy.
+            <div class="muted">
+              System: (Start–N1), (Start–N2), (N1–N2) → potem startuje N2. Każdy ma 2 mecze i 1 przerwy.
             </div>
           </div>
 
@@ -253,13 +266,12 @@ Bartek
           <div class="row">
             <button id="nextBtn" class="secondary">Pokaż kolejny mecz</button>
             <button id="undoBtn" class="secondary" disabled>Cofnij ostatni</button>
+            <button id="copyTableBtn" class="secondary">Kopiuj tabelę</button>
             <button id="resetCupBtn" class="danger">Reset turnieju</button>
           </div>
 
           <div class="status" id="cupStatus">Dodaj wynik albo kliknij „Pokaż kolejny mecz”.</div>
-          <div class="small">
-            Punkty: wygrana 3, remis 1, porażka 0. Tabela liczy M/Z/R/P, bramki, +/- i punkty.
-          </div>
+          <div class="small">Kopiuj tabelę = gotowy tekst do wklejenia na grupę.</div>
         </div>
 
         <div class="panel">
@@ -310,11 +322,16 @@ Bartek
   ];
   const teamName = (key)=>TEAMS.find(t=>t.key===key)?.name || key;
 
-  // ---------- LOSOWANIE ----------
+  function escapeHtml(str){
+    return str.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+              .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+
+  // ---------- LOSOWANIE (BALANS SIŁY) ----------
   const elPlayers = document.getElementById("players");
   const drawBtn = document.getElementById("drawBtn");
   const reshuffleBtn = document.getElementById("reshuffleBtn");
-  const copyBtn = document.getElementById("copyBtn");
+  const copyTeamsBtn = document.getElementById("copyTeamsBtn");
   const resetBtn = document.getElementById("resetBtn");
   const statusEl = document.getElementById("status");
 
@@ -326,11 +343,39 @@ Bartek
   const cOrange = document.getElementById("cOrange");
   const cPurple = document.getElementById("cPurple");
 
-  let lastTeams = null;
+  const pYellow = document.getElementById("pYellow");
+  const pOrange = document.getElementById("pOrange");
+  const pPurple = document.getElementById("pPurple");
 
-  function sanitizeNames(raw){
-    return raw.split("\n").map(s=>s.trim()).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i);
+  let lastTeams = null; // {yellow:[{name,power}], orange:..., purple:...}
+
+  function parsePlayers(raw){
+    const lines = raw.split("\n").map(s=>s.trim()).filter(Boolean);
+
+    // normalize duplicates by name (keep highest power)
+    const map = new Map();
+    for(const line of lines){
+      // take last token if numeric
+      const parts = line.split(/\s+/).filter(Boolean);
+      let power = 3;
+      if(parts.length >= 2){
+        const maybe = parts[parts.length - 1];
+        const num = Number(maybe);
+        if(Number.isFinite(num) && num >= 0){
+          power = num;
+          parts.pop();
+        }
+      }
+      const name = parts.join(" ").trim();
+      if(!name) continue;
+
+      if(!map.has(name) || map.get(name).power < power){
+        map.set(name, {name, power});
+      }
+    }
+    return Array.from(map.values());
   }
+
   function shuffle(arr){
     for(let i=arr.length-1;i>0;i--){
       const j=Math.floor(Math.random()*(i+1));
@@ -338,68 +383,101 @@ Bartek
     }
     return arr;
   }
-  function escapeHtml(str){
-    return str.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
-              .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+
+  // Greedy balance:
+  // 1) sort by power desc
+  // 2) assign each player to team with smallest sum power
+  function balanceTeams(players){
+    const shuffled = shuffle([...players]);
+    shuffled.sort((a,b)=>b.power - a.power);
+
+    const teams = {
+      yellow: { players: [], sum: 0 },
+      orange: { players: [], sum: 0 },
+      purple: { players: [], sum: 0 }
+    };
+    const keys = ["yellow","orange","purple"];
+
+    for(const p of shuffled){
+      keys.sort((k1,k2)=>{
+        if(teams[k1].sum !== teams[k2].sum) return teams[k1].sum - teams[k2].sum;
+        if(teams[k1].players.length !== teams[k2].players.length) return teams[k1].players.length - teams[k2].players.length;
+        return Math.random() - 0.5;
+      });
+      const k = keys[0];
+      teams[k].players.push(p);
+      teams[k].sum += p.power;
+    }
+
+    // sort names for display
+    for(const k of keys){
+      teams[k].players.sort((a,b)=>a.name.localeCompare(b.name,"pl"));
+    }
+    return teams;
   }
-  function renderList(el, names){
-    el.innerHTML = names.map(n => `<li>${escapeHtml(n)}</li>`).join("");
+
+  function renderTeamList(ul, players){
+    ul.innerHTML = players.map(p => `<li>${escapeHtml(p.name)} <span style="color:var(--muted);font-weight:900;">(${p.power})</span></li>`).join("");
   }
 
   function drawTeams(){
-    const names = sanitizeNames(elPlayers.value);
-    if(names.length < 3){
+    const players = parsePlayers(elPlayers.value);
+    if(players.length < 3){
       statusEl.textContent = "Dodaj minimum 3 zawodników (po 1 w linii).";
       return null;
     }
-    const mixed = shuffle([...names]);
-    const yellow = [], orange = [], purple = [];
-    mixed.forEach((name, idx) => {
-      const m = idx % 3;
-      if(m === 0) yellow.push(name);
-      if(m === 1) orange.push(name);
-      if(m === 2) purple.push(name);
-    });
-    yellow.sort((a,b)=>a.localeCompare(b,"pl"));
-    orange.sort((a,b)=>a.localeCompare(b,"pl"));
-    purple.sort((a,b)=>a.localeCompare(b,"pl"));
+    const t = balanceTeams(players);
 
-    renderList(listYellow, yellow);
-    renderList(listOrange, orange);
-    renderList(listPurple, purple);
+    renderTeamList(listYellow, t.yellow.players);
+    renderTeamList(listOrange, t.orange.players);
+    renderTeamList(listPurple, t.purple.players);
 
-    cYellow.textContent = yellow.length;
-    cOrange.textContent = orange.length;
-    cPurple.textContent = purple.length;
+    cYellow.textContent = t.yellow.players.length;
+    cOrange.textContent = t.orange.players.length;
+    cPurple.textContent = t.purple.players.length;
 
-    statusEl.textContent = "Wylosowano ✅";
+    pYellow.textContent = `Suma siły: ${t.yellow.sum}`;
+    pOrange.textContent = `Suma siły: ${t.orange.sum}`;
+    pPurple.textContent = `Suma siły: ${t.purple.sum}`;
+
+    lastTeams = {
+      yellow: t.yellow.players,
+      orange: t.orange.players,
+      purple: t.purple.players,
+      sums: { yellow: t.yellow.sum, orange: t.orange.sum, purple: t.purple.sum }
+    };
+
     reshuffleBtn.disabled = false;
-    copyBtn.disabled = false;
+    copyTeamsBtn.disabled = false;
+    statusEl.textContent = "Wylosowano i wyrównano ✅";
 
-    lastTeams = {yellow, orange, purple};
-    localStorage.setItem("players_simple", elPlayers.value);
-    localStorage.setItem("teams_simple", JSON.stringify(lastTeams));
+    localStorage.setItem("players_balanced", elPlayers.value);
+    localStorage.setItem("teams_balanced", JSON.stringify(lastTeams));
     return lastTeams;
   }
 
   drawBtn.addEventListener("click", drawTeams);
   reshuffleBtn.addEventListener("click", drawTeams);
 
-  copyBtn.addEventListener("click", async ()=>{
+  copyTeamsBtn.addEventListener("click", async ()=>{
     if(!lastTeams){ statusEl.textContent = "Najpierw wylosuj składy."; return; }
+
+    const fmt = (arr)=>arr.map(p=>`- ${p.name} (${p.power})`).join("\n");
     const text =
-`Żółci (${lastTeams.yellow.length}):
-- ${lastTeams.yellow.join("\n- ")}
+`SKŁADY – trening
+Żółci (suma ${lastTeams.sums.yellow} | ${lastTeams.yellow.length}):
+${fmt(lastTeams.yellow)}
 
-Pomarańczowi (${lastTeams.orange.length}):
-- ${lastTeams.orange.join("\n- ")}
+Pomarańczowi (suma ${lastTeams.sums.orange} | ${lastTeams.orange.length}):
+${fmt(lastTeams.orange)}
 
-Fioletowi (${lastTeams.purple.length}):
-- ${lastTeams.purple.join("\n- ")}`;
+Fioletowi (suma ${lastTeams.sums.purple} | ${lastTeams.purple.length}):
+${fmt(lastTeams.purple)}`;
+
     try{
       await navigator.clipboard.writeText(text);
-      statusEl.textContent = "Składy skopiowane ✅";
-    }catch(e){
+      statusEl.textContent = "Składy skopiowane do schowka ✅";
+    }catch{
       statusEl.textContent = "Nie mogę skopiować (ograniczenia przeglądarki).";
     }
   });
@@ -410,41 +488,16 @@ Fioletowi (${lastTeams.purple.length}):
     listOrange.innerHTML = "";
     listPurple.innerHTML = "";
     cYellow.textContent = cOrange.textContent = cPurple.textContent = "0";
-    statusEl.textContent = "Wpisz zawodników i kliknij „Losuj równo”.";
+    pYellow.textContent = pOrange.textContent = pPurple.textContent = "Suma siły: 0";
+    statusEl.textContent = "Wpisz zawodników i kliknij „Losuj (balans siły)”.";
     reshuffleBtn.disabled = true;
-    copyBtn.disabled = true;
+    copyTeamsBtn.disabled = true;
     lastTeams = null;
-    localStorage.removeItem("players_simple");
-    localStorage.removeItem("teams_simple");
+    localStorage.removeItem("players_balanced");
+    localStorage.removeItem("teams_balanced");
   });
 
-  // Load saved for draw
-  (function(){
-    const saved = localStorage.getItem("players_simple");
-    if(saved) elPlayers.value = saved;
-    const savedTeams = localStorage.getItem("teams_simple");
-    if(savedTeams){
-      try{
-        lastTeams = JSON.parse(savedTeams);
-        renderList(listYellow, lastTeams.yellow || []);
-        renderList(listOrange, lastTeams.orange || []);
-        renderList(listPurple, lastTeams.purple || []);
-        cYellow.textContent = (lastTeams.yellow||[]).length;
-        cOrange.textContent = (lastTeams.orange||[]).length;
-        cPurple.textContent = (lastTeams.purple||[]).length;
-        reshuffleBtn.disabled = false;
-        copyBtn.disabled = false;
-        statusEl.textContent = "Wczytano poprzednie losowanie ✅";
-      }catch{}
-    }
-  })();
-
   // ---------- TURNIEJ: 2 MECZE + PAUZA ----------
-  // Logika: mamy "starter" S. Kolejność meczów w bloku:
-  // 1) S vs N1 (pauza: N2)
-  // 2) S vs N2 (pauza: N1)
-  // 3) N1 vs N2 (pauza: S)
-  // Potem starter = N2 (czyli ten co pauzował w 1 meczu).
   const nextMatchTitle = document.getElementById("nextMatchTitle");
   const restInfo = document.getElementById("restInfo");
   const cupStatus = document.getElementById("cupStatus");
@@ -452,16 +505,17 @@ Fioletowi (${lastTeams.purple.length}):
   const addResultBtn = document.getElementById("addResultBtn");
   const undoBtn = document.getElementById("undoBtn");
   const resetCupBtn = document.getElementById("resetCupBtn");
+  const copyTableBtn = document.getElementById("copyTableBtn");
   const gA = document.getElementById("gA");
   const gB = document.getElementById("gB");
   const tableBody = document.getElementById("tableBody");
   const matchesBody = document.getElementById("matchesBody");
 
   let cupState = {
-    starterIdx: 2,   // domyślnie zaczyna Fiolet (yellow=0, orange=1, purple=2)
-    stepInBlock: 0,  // 0..2
-    currentMatch: null, // {homeKey, awayKey, restKey}
-    matches: []      // history: {homeKey, awayKey, gh, ga, restKey}
+    starterIdx: 2,    // start: Fiolet
+    stepInBlock: 0,   // 0..2
+    currentMatch: null,
+    matches: []       // {homeKey, awayKey, restKey, gh, ga}
   };
 
   function saveCup(){ localStorage.setItem("cup_state_v1", JSON.stringify(cupState)); }
@@ -507,11 +561,9 @@ Fioletowi (${lastTeams.purple.length}):
   }
 
   function advanceMatch(){
-    // przejście do kolejnego meczu wg schematu 2 mecze + pauza
     cupState.stepInBlock++;
     if(cupState.stepInBlock > 2){
       cupState.stepInBlock = 0;
-      // startuje N2 (ten co pauzował w 1 meczu)
       cupState.starterIdx = (cupState.starterIdx + 2) % 3;
     }
     buildMatchFromState();
@@ -550,7 +602,6 @@ Fioletowi (${lastTeams.purple.length}):
   function renderAll(){
     showCurrentMatch();
 
-    // tabela
     const rows = computeTable();
     tableBody.innerHTML = "";
     for(const r of rows){
@@ -563,7 +614,6 @@ Fioletowi (${lastTeams.purple.length}):
       `);
     }
 
-    // mecze
     matchesBody.innerHTML = "";
     cupState.matches.forEach((m, idx)=>{
       matchesBody.insertAdjacentHTML("beforeend", `
@@ -603,7 +653,6 @@ Fioletowi (${lastTeams.purple.length}):
     gA.value = ""; gB.value = "";
     cupStatus.textContent = "Dodano wynik ✅";
 
-    // po dodaniu wyniku automatycznie przejdź do kolejnego meczu
     advanceMatch();
     renderAll();
     saveCup();
@@ -613,16 +662,14 @@ Fioletowi (${lastTeams.purple.length}):
     if(!cupState.matches.length) return;
     cupState.matches.pop();
 
-    // Cofanie najprościej: reset bieżącego meczu na podstawie ilości wpisanych spotkań.
-    // (nie bawimy się w “cofnij dokładnie stan” – tylko wracamy do startowego i odtwarzamy)
+    // reset + odtworzenie stanu na podstawie liczby spotkań
     const played = cupState.matches.length;
     cupState.starterIdx = 2; // start: fiolet
     cupState.stepInBlock = 0;
     cupState.currentMatch = null;
-    // odtwórz stan: każde 1 spotkanie = advance
+
     buildMatchFromState();
     for(let i=0;i<played;i++){
-      // “symuluj” przejście po meczu
       cupState.stepInBlock++;
       if(cupState.stepInBlock > 2){
         cupState.stepInBlock = 0;
@@ -643,10 +690,67 @@ Fioletowi (${lastTeams.purple.length}):
     renderAll();
   });
 
+  copyTableBtn.addEventListener("click", async ()=>{
+    const rows = computeTable();
+    const lines = rows.map((r, i)=>
+      `${i+1}. ${r.name} | M:${r.M} Z:${r.Z} R:${r.R} P:${r.P} | ${r.goals} (${r.GD}) | Pkt:${r.Pkt}`
+    ).join("\n");
+
+    const matchesLines = cupState.matches.map((m,i)=>
+      `${i+1}) ${teamName(m.homeKey)} – ${teamName(m.awayKey)} ${m.gh}:${m.ga} (pauza: ${teamName(m.restKey)})`
+    ).join("\n");
+
+    const text =
+`TABELA – trening
+${lines}
+
+MECZE:
+${matchesLines || "(brak)"}`;
+
+    try{
+      await navigator.clipboard.writeText(text);
+      cupStatus.textContent = "Tabela + mecze skopiowane ✅";
+    }catch{
+      cupStatus.textContent = "Nie mogę skopiować (ograniczenia przeglądarki).";
+    }
+  });
+
   // init cup
   loadCup();
   buildMatchFromState();
   renderAll();
+
+  // init draw saved
+  (function(){
+    const saved = localStorage.getItem("players_balanced");
+    if(saved) elPlayers.value = saved;
+
+    const savedTeams = localStorage.getItem("teams_balanced");
+    if(savedTeams){
+      try{
+        lastTeams = JSON.parse(savedTeams);
+        const y = lastTeams.yellow || [];
+        const o = lastTeams.orange || [];
+        const p = lastTeams.purple || [];
+        renderTeamList(listYellow, y);
+        renderTeamList(listOrange, o);
+        renderTeamList(listPurple, p);
+        cYellow.textContent = y.length;
+        cOrange.textContent = o.length;
+        cPurple.textContent = p.length;
+        pYellow.textContent = `Suma siły: ${lastTeams.sums?.yellow ?? 0}`;
+        pOrange.textContent = `Suma siły: ${lastTeams.sums?.orange ?? 0}`;
+        pPurple.textContent = `Suma siły: ${lastTeams.sums?.purple ?? 0}`;
+        reshuffleBtn.disabled = false;
+        copyTeamsBtn.disabled = false;
+        statusEl.textContent = "Wczytano poprzednie losowanie ✅";
+      }catch{}
+    }
+  })();
+
+  function renderTeamList(ul, players){
+    ul.innerHTML = (players||[]).map(p => `<li>${escapeHtml(p.name)} <span style="color:var(--muted);font-weight:900;">(${p.power})</span></li>`).join("");
+  }
 </script>
 </body>
 </html>
