@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
-  <title>Trening – losowanie 3 składy</title>
+  <title>Trening – losowanie + turniej</title>
   <style>
     :root{
       --bg:#0b1220;
@@ -40,6 +40,19 @@
     }
     h1{margin:0;font-size:18px}
     .sub{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.35}
+
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .tab{
+      border:1px solid var(--border);
+      background:#162446;
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:999px;
+      font-weight:900;
+      cursor:pointer;
+      font-size:13px;
+    }
+    .tab.active{background:#22345f}
 
     .grid{display:grid;grid-template-columns:1fr;gap:12px}
     @media(min-width:980px){.grid{grid-template-columns:420px 1fr}}
@@ -78,7 +91,10 @@
     }
     button.secondary{background:#0f1b35}
     button.danger{background:#3a1630}
+    button:disabled{opacity:.55;cursor:not-allowed}
+
     .status{margin-top:10px;font-size:13px;color:var(--muted)}
+    .small{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.35}
 
     .teams{
       display:grid;
@@ -108,59 +124,193 @@
 
     ul{margin:0;padding-left:18px}
     li{margin:6px 0}
-    .small{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.35}
+
+    /* Turniej */
+    .box{
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:rgba(0,0,0,.18);
+      padding:12px;
+      box-shadow:0 8px 18px rgba(0,0,0,.25);
+    }
+    .big{
+      font-size:18px;
+      font-weight:1000;
+      margin:0;
+    }
+    .muted{color:var(--muted); font-size:13px; margin-top:6px}
+    .formRow{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
+    @media(min-width:700px){.formRow{grid-template-columns: 1fr 1fr auto}}
+    input{
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:#0b1427;
+      color:var(--text);
+      padding:12px;
+      outline:none;
+      font-size:14px;
+      width:100%;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      overflow:hidden;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:rgba(0,0,0,.18);
+      margin-top:12px;
+    }
+    thead th{
+      text-align:left;
+      padding:10px;
+      font-size:13px;
+      border-bottom:1px solid var(--border);
+      color:#fff;
+    }
+    tbody td{
+      padding:9px 10px;
+      font-size:13px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    tbody tr:last-child td{border-bottom:none}
+
+    .view{display:none}
+    .view.show{display:block}
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <h1>Trening – losowanie 3 składy</h1>
-      <div class="sub">Wpisujesz zawodników → „Losuj równo” → wyświetla 3 składy (Żółci / Pomarańczowi / Fioletowi).</div>
+      <h1>Trening – losowanie + turniej</h1>
+      <div class="sub">Losowanie składów + panel turniejowy (system: 2 mecze i pauza dla każdej drużyny).</div>
+      <div class="tabs">
+        <button class="tab active" id="tabDraw">Losowanie</button>
+        <button class="tab" id="tabCup">Turniej</button>
+      </div>
     </header>
 
-    <div class="grid">
-      <div class="panel">
-        <div style="font-weight:900;font-size:14px;margin-bottom:8px;">Zawodnicy (1 linia = 1 osoba)</div>
-        <textarea id="players" placeholder="np.
+    <!-- LOSOWANIE -->
+    <div id="viewDraw" class="view show">
+      <div class="grid">
+        <div class="panel">
+          <div style="font-weight:900;font-size:14px;margin-bottom:8px;">Zawodnicy (1 linia = 1 osoba)</div>
+          <textarea id="players" placeholder="np.
 Tomek
 Kuba
 Mati
 Bartek
 ..."></textarea>
 
-        <div class="row">
-          <button id="drawBtn">Losuj równo</button>
-          <button id="reshuffleBtn" class="secondary" disabled>Losuj jeszcze raz</button>
-          <button id="copyBtn" class="secondary" disabled>Kopiuj składy</button>
-          <button id="resetBtn" class="danger">Reset</button>
+          <div class="row">
+            <button id="drawBtn">Losuj równo</button>
+            <button id="reshuffleBtn" class="secondary" disabled>Losuj jeszcze raz</button>
+            <button id="copyBtn" class="secondary" disabled>Kopiuj składy</button>
+            <button id="resetBtn" class="danger">Reset</button>
+          </div>
+
+          <div class="status" id="status">Wpisz zawodników i kliknij „Losuj równo”.</div>
+          <div class="small">Rozdział: po wymieszaniu listy idą po kolei do 3 drużyn (różnica max 1).</div>
         </div>
 
-        <div class="status" id="status">Wpisz zawodników i kliknij „Losuj równo”.</div>
-        <div class="small">
-          Zasada: rozdzielam po kolei do 3 drużyn po wymieszaniu listy (różnica max 1 osoba).
+        <div class="panel">
+          <div class="teams">
+            <div class="teamCard">
+              <div class="teamTitle"><span class="dot yellow"></span> Żółci <span class="count" id="cYellow">0</span></div>
+              <ul id="listYellow"></ul>
+            </div>
+            <div class="teamCard">
+              <div class="teamTitle"><span class="dot orange"></span> Pomarańczowi <span class="count" id="cOrange">0</span></div>
+              <ul id="listOrange"></ul>
+            </div>
+            <div class="teamCard">
+              <div class="teamTitle"><span class="dot purple"></span> Fioletowi <span class="count" id="cPurple">0</span></div>
+              <ul id="listPurple"></ul>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
 
-      <div class="panel">
-        <div class="teams">
-          <div class="teamCard">
-            <div class="teamTitle"><span class="dot yellow"></span> Żółci <span class="count" id="cYellow">0</span></div>
-            <ul id="listYellow"></ul>
+    <!-- TURNIEJ -->
+    <div id="viewCup" class="view">
+      <div class="grid">
+        <div class="panel">
+          <div class="box">
+            <p class="big" id="nextMatchTitle">Następny mecz: —</p>
+            <div class="muted" id="restInfo">Pauza: —</div>
+            <div class="muted" id="systemInfo">
+              System: (A–B), (A–C), (B–C) → potem startuje C. Każdy ma 2 mecze i 1 przerwy.
+            </div>
           </div>
-          <div class="teamCard">
-            <div class="teamTitle"><span class="dot orange"></span> Pomarańczowi <span class="count" id="cOrange">0</span></div>
-            <ul id="listOrange"></ul>
+
+          <div class="formRow">
+            <input id="gA" type="number" min="0" inputmode="numeric" placeholder="gole gospodarzy" />
+            <input id="gB" type="number" min="0" inputmode="numeric" placeholder="gole gości" />
+            <button id="addResultBtn">Dodaj wynik</button>
           </div>
-          <div class="teamCard">
-            <div class="teamTitle"><span class="dot purple"></span> Fioletowi <span class="count" id="cPurple">0</span></div>
-            <ul id="listPurple"></ul>
+
+          <div class="row">
+            <button id="nextBtn" class="secondary">Pokaż kolejny mecz</button>
+            <button id="undoBtn" class="secondary" disabled>Cofnij ostatni</button>
+            <button id="resetCupBtn" class="danger">Reset turnieju</button>
           </div>
+
+          <div class="status" id="cupStatus">Dodaj wynik albo kliknij „Pokaż kolejny mecz”.</div>
+          <div class="small">
+            Punkty: wygrana 3, remis 1, porażka 0. Tabela liczy M/Z/R/P, bramki, +/- i punkty.
+          </div>
+        </div>
+
+        <div class="panel">
+          <div style="font-weight:1000;">Tabela</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Drużyna</th><th>M</th><th>Z</th><th>R</th><th>P</th><th>Bramki</th><th>+/-</th><th>Pkt</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+
+          <div style="margin-top:14px;font-weight:1000;">Mecze</div>
+          <table>
+            <thead>
+              <tr><th>#</th><th>Mecz</th><th>Wynik</th><th>Pauza</th></tr>
+            </thead>
+            <tbody id="matchesBody"></tbody>
+          </table>
         </div>
       </div>
     </div>
   </div>
 
 <script>
+  // ---------- TABS ----------
+  const tabDraw = document.getElementById("tabDraw");
+  const tabCup  = document.getElementById("tabCup");
+  const viewDraw = document.getElementById("viewDraw");
+  const viewCup  = document.getElementById("viewCup");
+
+  function showTab(which){
+    const drawOn = which === "draw";
+    tabDraw.classList.toggle("active", drawOn);
+    tabCup.classList.toggle("active", !drawOn);
+    viewDraw.classList.toggle("show", drawOn);
+    viewCup.classList.toggle("show", !drawOn);
+  }
+  tabDraw.addEventListener("click", ()=>showTab("draw"));
+  tabCup.addEventListener("click", ()=>{ showTab("cup"); renderAll(); });
+
+  // ---------- CONST TEAMS ----------
+  const TEAMS = [
+    { key:"yellow", name:"Żółci" },
+    { key:"orange", name:"Pomarańczowi" },
+    { key:"purple", name:"Fioletowi" },
+  ];
+  const teamName = (key)=>TEAMS.find(t=>t.key===key)?.name || key;
+
+  // ---------- LOSOWANIE ----------
   const elPlayers = document.getElementById("players");
   const drawBtn = document.getElementById("drawBtn");
   const reshuffleBtn = document.getElementById("reshuffleBtn");
@@ -179,10 +329,7 @@ Bartek
   let lastTeams = null;
 
   function sanitizeNames(raw){
-    return raw.split("\n")
-      .map(s=>s.trim())
-      .filter(Boolean)
-      .filter((v,i,a)=>a.indexOf(v)===i); // usuń duplikaty
+    return raw.split("\n").map(s=>s.trim()).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i);
   }
   function shuffle(arr){
     for(let i=arr.length-1;i>0;i--){
@@ -191,11 +338,12 @@ Bartek
     }
     return arr;
   }
+  function escapeHtml(str){
+    return str.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+              .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
   function renderList(el, names){
     el.innerHTML = names.map(n => `<li>${escapeHtml(n)}</li>`).join("");
-  }
-  function escapeHtml(str){
-    return str.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
   }
 
   function drawTeams(){
@@ -212,8 +360,6 @@ Bartek
       if(m === 1) orange.push(name);
       if(m === 2) purple.push(name);
     });
-
-    // dla estetyki: sort w środku składu
     yellow.sort((a,b)=>a.localeCompare(b,"pl"));
     orange.sort((a,b)=>a.localeCompare(b,"pl"));
     purple.sort((a,b)=>a.localeCompare(b,"pl"));
@@ -252,9 +398,9 @@ Fioletowi (${lastTeams.purple.length}):
 - ${lastTeams.purple.join("\n- ")}`;
     try{
       await navigator.clipboard.writeText(text);
-      statusEl.textContent = "Składy skopiowane do schowka ✅";
+      statusEl.textContent = "Składy skopiowane ✅";
     }catch(e){
-      statusEl.textContent = "Nie mogę skopiować (ograniczenia przeglądarki). Zrób screenshot albo skopiuj ręcznie.";
+      statusEl.textContent = "Nie mogę skopiować (ograniczenia przeglądarki).";
     }
   });
 
@@ -272,7 +418,7 @@ Fioletowi (${lastTeams.purple.length}):
     localStorage.removeItem("teams_simple");
   });
 
-  // load saved
+  // Load saved for draw
   (function(){
     const saved = localStorage.getItem("players_simple");
     if(saved) elPlayers.value = saved;
@@ -292,6 +438,215 @@ Fioletowi (${lastTeams.purple.length}):
       }catch{}
     }
   })();
+
+  // ---------- TURNIEJ: 2 MECZE + PAUZA ----------
+  // Logika: mamy "starter" S. Kolejność meczów w bloku:
+  // 1) S vs N1 (pauza: N2)
+  // 2) S vs N2 (pauza: N1)
+  // 3) N1 vs N2 (pauza: S)
+  // Potem starter = N2 (czyli ten co pauzował w 1 meczu).
+  const nextMatchTitle = document.getElementById("nextMatchTitle");
+  const restInfo = document.getElementById("restInfo");
+  const cupStatus = document.getElementById("cupStatus");
+  const nextBtn = document.getElementById("nextBtn");
+  const addResultBtn = document.getElementById("addResultBtn");
+  const undoBtn = document.getElementById("undoBtn");
+  const resetCupBtn = document.getElementById("resetCupBtn");
+  const gA = document.getElementById("gA");
+  const gB = document.getElementById("gB");
+  const tableBody = document.getElementById("tableBody");
+  const matchesBody = document.getElementById("matchesBody");
+
+  let cupState = {
+    starterIdx: 2,   // domyślnie zaczyna Fiolet (yellow=0, orange=1, purple=2)
+    stepInBlock: 0,  // 0..2
+    currentMatch: null, // {homeKey, awayKey, restKey}
+    matches: []      // history: {homeKey, awayKey, gh, ga, restKey}
+  };
+
+  function saveCup(){ localStorage.setItem("cup_state_v1", JSON.stringify(cupState)); }
+  function loadCup(){
+    const s = localStorage.getItem("cup_state_v1");
+    if(!s) return;
+    try{
+      const parsed = JSON.parse(s);
+      if(parsed && typeof parsed.starterIdx==="number") cupState = parsed;
+    }catch{}
+  }
+
+  function buildMatchFromState(){
+    const i = ((cupState.starterIdx % 3) + 3) % 3;
+    const n1 = (i + 1) % 3;
+    const n2 = (i + 2) % 3;
+
+    let homeIdx, awayIdx, restIdx;
+    if(cupState.stepInBlock === 0){
+      homeIdx = i;   awayIdx = n1;  restIdx = n2;
+    } else if(cupState.stepInBlock === 1){
+      homeIdx = i;   awayIdx = n2;  restIdx = n1;
+    } else {
+      homeIdx = n1;  awayIdx = n2;  restIdx = i;
+    }
+
+    const homeKey = TEAMS[homeIdx].key;
+    const awayKey = TEAMS[awayIdx].key;
+    const restKey = TEAMS[restIdx].key;
+    cupState.currentMatch = {homeKey, awayKey, restKey};
+  }
+
+  function prettyMatch(m){
+    return `${teamName(m.homeKey)} – ${teamName(m.awayKey)}`;
+  }
+
+  function showCurrentMatch(){
+    if(!cupState.currentMatch) buildMatchFromState();
+    nextMatchTitle.textContent = `Następny mecz: ${prettyMatch(cupState.currentMatch)}`;
+    restInfo.textContent = `Pauza: ${teamName(cupState.currentMatch.restKey)}`;
+    undoBtn.disabled = cupState.matches.length === 0;
+    saveCup();
+  }
+
+  function advanceMatch(){
+    // przejście do kolejnego meczu wg schematu 2 mecze + pauza
+    cupState.stepInBlock++;
+    if(cupState.stepInBlock > 2){
+      cupState.stepInBlock = 0;
+      // startuje N2 (ten co pauzował w 1 meczu)
+      cupState.starterIdx = (cupState.starterIdx + 2) % 3;
+    }
+    buildMatchFromState();
+    showCurrentMatch();
+    cupStatus.textContent = "Ustawiono kolejny mecz ✅";
+  }
+
+  function computeTable(){
+    const stats = {};
+    TEAMS.forEach(t=>{
+      stats[t.key] = { key:t.key, name:t.name, M:0,Z:0,R:0,P:0,GF:0,GA:0,Pkt:0 };
+    });
+
+    for(const m of cupState.matches){
+      const H = stats[m.homeKey];
+      const A = stats[m.awayKey];
+      H.M++; A.M++;
+      H.GF += m.gh; H.GA += m.ga;
+      A.GF += m.ga; A.GA += m.gh;
+
+      if(m.gh > m.ga){ H.Z++; A.P++; H.Pkt += 3; }
+      else if(m.gh < m.ga){ A.Z++; H.P++; A.Pkt += 3; }
+      else { H.R++; A.R++; H.Pkt += 1; A.Pkt += 1; }
+    }
+
+    const rows = Object.values(stats).map(s=>({...s, GD: s.GF - s.GA, goals:`${s.GF}-${s.GA}`}));
+    rows.sort((x,y)=>{
+      if(y.Pkt !== x.Pkt) return y.Pkt - x.Pkt;
+      if(y.GD !== x.GD) return y.GD - x.GD;
+      if(y.GF !== x.GF) return y.GF - x.GF;
+      return x.name.localeCompare(y.name,"pl");
+    });
+    return rows;
+  }
+
+  function renderAll(){
+    showCurrentMatch();
+
+    // tabela
+    const rows = computeTable();
+    tableBody.innerHTML = "";
+    for(const r of rows){
+      tableBody.insertAdjacentHTML("beforeend", `
+        <tr>
+          <td><b>${escapeHtml(r.name)}</b></td>
+          <td>${r.M}</td><td>${r.Z}</td><td>${r.R}</td><td>${r.P}</td>
+          <td>${r.goals}</td><td>${r.GD}</td><td><b>${r.Pkt}</b></td>
+        </tr>
+      `);
+    }
+
+    // mecze
+    matchesBody.innerHTML = "";
+    cupState.matches.forEach((m, idx)=>{
+      matchesBody.insertAdjacentHTML("beforeend", `
+        <tr>
+          <td>${idx+1}</td>
+          <td>${escapeHtml(teamName(m.homeKey))} – ${escapeHtml(teamName(m.awayKey))}</td>
+          <td><b>${m.gh}:${m.ga}</b></td>
+          <td>${escapeHtml(teamName(m.restKey))}</td>
+        </tr>
+      `);
+    });
+
+    undoBtn.disabled = cupState.matches.length === 0;
+  }
+
+  nextBtn.addEventListener("click", ()=>{
+    advanceMatch();
+    renderAll();
+  });
+
+  addResultBtn.addEventListener("click", ()=>{
+    if(!cupState.currentMatch) buildMatchFromState();
+
+    const gh = Number(gA.value);
+    const ga = Number(gB.value);
+    if(!Number.isFinite(gh) || !Number.isFinite(ga) || gh<0 || ga<0){
+      cupStatus.textContent = "Podaj poprawne gole (0 lub więcej).";
+      return;
+    }
+
+    cupState.matches.push({
+      homeKey: cupState.currentMatch.homeKey,
+      awayKey: cupState.currentMatch.awayKey,
+      restKey: cupState.currentMatch.restKey,
+      gh, ga
+    });
+    gA.value = ""; gB.value = "";
+    cupStatus.textContent = "Dodano wynik ✅";
+
+    // po dodaniu wyniku automatycznie przejdź do kolejnego meczu
+    advanceMatch();
+    renderAll();
+    saveCup();
+  });
+
+  undoBtn.addEventListener("click", ()=>{
+    if(!cupState.matches.length) return;
+    cupState.matches.pop();
+
+    // Cofanie najprościej: reset bieżącego meczu na podstawie ilości wpisanych spotkań.
+    // (nie bawimy się w “cofnij dokładnie stan” – tylko wracamy do startowego i odtwarzamy)
+    const played = cupState.matches.length;
+    cupState.starterIdx = 2; // start: fiolet
+    cupState.stepInBlock = 0;
+    cupState.currentMatch = null;
+    // odtwórz stan: każde 1 spotkanie = advance
+    buildMatchFromState();
+    for(let i=0;i<played;i++){
+      // “symuluj” przejście po meczu
+      cupState.stepInBlock++;
+      if(cupState.stepInBlock > 2){
+        cupState.stepInBlock = 0;
+        cupState.starterIdx = (cupState.starterIdx + 2) % 3;
+      }
+    }
+    buildMatchFromState();
+    cupStatus.textContent = "Cofnięto ostatni wynik.";
+    saveCup();
+    renderAll();
+  });
+
+  resetCupBtn.addEventListener("click", ()=>{
+    cupState = { starterIdx: 2, stepInBlock: 0, currentMatch: null, matches: [] };
+    localStorage.removeItem("cup_state_v1");
+    cupStatus.textContent = "Reset turnieju ✅";
+    buildMatchFromState();
+    renderAll();
+  });
+
+  // init cup
+  loadCup();
+  buildMatchFromState();
+  renderAll();
 </script>
 </body>
 </html>
