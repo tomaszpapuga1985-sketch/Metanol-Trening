@@ -1,942 +1,323 @@
 <!doctype html>
 <html lang="pl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#0b1220" />
-  <title>Trening – losowanie + turniej + historia</title>
-  <style>
-    :root{
-      --bg:#0b1220;
-      --panel:rgba(16,26,46,.78);
-      --text:#e9eefc;
-      --muted:#9aa7c2;
-      --border:rgba(255,255,255,.12);
-      --shadow:0 12px 30px rgba(0,0,0,.35);
-      --r:16px;
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Trening – PRO</title>
 
-      --yellow:#ffd400;
-      --orange:#ff7a00;
-      --purple:#a855f7;
-      --blue:#3b82f6;
-      --red:#ef4444;
-      --green:#22c55e;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; color:var(--text);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(1000px 480px at 20% 10%, rgba(255,255,255,.08), transparent),
-                  radial-gradient(900px 420px at 80% 20%, rgba(255,255,255,.06), transparent),
-                  var(--bg);
-      padding:14px;
-    }
-    .wrap{max-width:1100px;margin:0 auto;display:grid;gap:12px}
-    header{
-      background:linear-gradient(to bottom, rgba(11,18,32,.92), rgba(11,18,32,.65));
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:var(--r);
-      box-shadow:var(--shadow);
-      padding:12px 14px;
-      position:sticky; top:0; z-index:5;
-      backdrop-filter: blur(10px);
-    }
-    h1{margin:0;font-size:18px}
-    .sub{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.35}
-
-    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    .tab{
-      border:1px solid var(--border);
-      background:#162446;
-      color:var(--text);
-      padding:10px 12px;
-      border-radius:999px;
-      font-weight:900;
-      cursor:pointer;
-      font-size:13px;
-    }
-    .tab.active{background:#22345f}
-
-    .grid{display:grid;grid-template-columns:1fr;gap:12px}
-    @media(min-width:980px){.grid{grid-template-columns:420px 1fr}}
-
-    .panel{
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:var(--r);
-      box-shadow:var(--shadow);
-      padding:14px;
-      backdrop-filter: blur(8px);
-    }
-
-    textarea{
-      width:100%; min-height:220px; resize:vertical;
-      border-radius:14px;
-      border:1px solid var(--border);
-      background:#0b1427;
-      color:var(--text);
-      padding:12px;
-      outline:none;
-      font-size:14px;
-      line-height:1.35;
-    }
-    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-    button{
-      border:1px solid var(--border);
-      background:#162446;
-      color:var(--text);
-      padding:12px 12px;
-      border-radius:14px;
-      cursor:pointer;
-      font-weight:900;
-      font-size:14px;
-      touch-action:manipulation;
-    }
-    button.secondary{background:#0f1b35}
-    button.danger{background:#3a1630}
-    button:disabled{opacity:.55;cursor:not-allowed}
-
-    .status{margin-top:10px;font-size:13px;color:var(--muted)}
-    .small{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.35}
-
-    .teams{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:12px;
-    }
-    @media(min-width:720px){.teams{grid-template-columns:repeat(3,1fr)}}
-    @media(min-width:980px){.teams{grid-template-columns:repeat(3,1fr)}}
-    @media(min-width:1100px){.teams{grid-template-columns:repeat(3,1fr)}}
-
-    .teamCard{
-      border:1px solid var(--border);
-      border-radius:16px;
-      background:rgba(0,0,0,.18);
-      padding:12px;
-      box-shadow:0 8px 18px rgba(0,0,0,.25);
-      min-height:240px;
-    }
-    .teamTitle{
-      display:flex; align-items:center; gap:10px;
-      font-weight:1000;
-      margin-bottom:8px;
-    }
-    .dot{width:12px;height:12px;border-radius:99px;display:inline-block}
-    .count{margin-left:auto;color:var(--muted);font-size:12px;font-weight:800}
-    .power{color:var(--muted);font-size:12px;font-weight:900}
-
-    ul{margin:0;padding-left:18px}
-    li{margin:6px 0}
-
-    select, input{
-      border-radius:14px;
-      border:1px solid var(--border);
-      background:#0b1427;
-      color:var(--text);
-      padding:12px;
-      outline:none;
-      font-size:14px;
-    }
-
-    /* Turniej */
-    .box{
-      border:1px solid var(--border);
-      border-radius:16px;
-      background:rgba(0,0,0,.18);
-      padding:12px;
-      box-shadow:0 8px 18px rgba(0,0,0,.25);
-    }
-    .big{font-size:18px;font-weight:1000;margin:0}
-    .muted{color:var(--muted); font-size:13px; margin-top:6px}
-
-    .formRow{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
-    @media(min-width:700px){.formRow{grid-template-columns: 1fr 1fr auto}}
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      overflow:hidden;
-      border-radius:16px;
-      border:1px solid var(--border);
-      background:rgba(0,0,0,.18);
-      margin-top:12px;
-    }
-    thead th{
-      text-align:left;
-      padding:10px;
-      font-size:13px;
-      border-bottom:1px solid var(--border);
-      color:#fff;
-    }
-    tbody td{
-      padding:9px 10px;
-      font-size:13px;
-      border-bottom:1px solid rgba(255,255,255,.06);
-    }
-    tbody tr:last-child td{border-bottom:none}
-
-    .view{display:none}
-    .view.show{display:block}
-
-    .histItem{
-      border:1px solid var(--border);
-      border-radius:14px;
-      background:rgba(0,0,0,.16);
-      padding:12px;
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-      justify-content:space-between;
-      margin-top:10px;
-    }
-    .histMeta{font-size:13px}
-    .histBtns{display:flex;gap:8px;flex-wrap:wrap}
-  </style>
+<style>
+:root{
+--bg:#0f172a;
+--panel:#1e293b;
+--text:#f1f5f9;
+--muted:#94a3b8;
+--yellow:#facc15;
+--orange:#f97316;
+--purple:#a855f7;
+--blue:#3b82f6;
+--red:#ef4444;
+--green:#22c55e;
+}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui;padding:15px}
+h1{margin:0 0 10px 0}
+.panel{background:var(--panel);padding:15px;border-radius:14px;margin-bottom:15px}
+textarea,input,select{width:100%;background:#0b1220;border:1px solid #334155;color:var(--text);padding:10px;border-radius:10px}
+button{background:#334155;border:0;color:white;padding:10px 14px;border-radius:10px;font-weight:bold;cursor:pointer}
+button:hover{opacity:.9}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.teamCard{background:#0b1220;padding:10px;border-radius:12px;margin-top:10px}
+.small{font-size:12px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+td,th{padding:6px;border-bottom:1px solid #334155;font-size:13px}
+</style>
 </head>
+
 <body>
-  <div class="wrap">
-    <header>
-      <h1>Trening – losowanie + turniej + historia</h1>
-      <div class="sub">Losowanie z balansem siły (2–6 drużyn), turniej i zapis treningów.</div>
-      <div class="tabs">
-        <button class="tab active" id="tabDraw">Losowanie</button>
-        <button class="tab" id="tabCup">Turniej</button>
-        <button class="tab" id="tabHist">Historia</button>
-      </div>
-    </header>
 
-    <!-- LOSOWANIE -->
-    <div id="viewDraw" class="view show">
-      <div class="grid">
-        <div class="panel">
-          <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;">
-            <div style="font-weight:900;font-size:14px;">Zawodnicy (1 linia = 1 osoba)</div>
-            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-              <span style="font-size:12px;color:var(--muted);font-weight:900;">Ilość drużyn</span>
-              <select id="teamsCount">
-                <option value="2">2</option>
-                <option value="3" selected>3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-              </select>
-            </div>
-          </div>
+<h1>Trening – PRO ⚽</h1>
 
-          <textarea id="players" placeholder="np.
-Tomek 5
-Kuba 4
-Mati 3
-Bartek 2
-Radek
-..."></textarea>
+<div class="panel">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+<div><b>Ilość drużyn</b></div>
+<select id="teamCount">
+<option value="2">2</option>
+<option value="3" selected>3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+</select>
+</div>
 
-          <div class="row">
-            <button id="drawBtn">Losuj (balans siły)</button>
-            <button id="reshuffleBtn" class="secondary" disabled>Losuj jeszcze raz</button>
-            <button id="copyTeamsBtn" class="secondary" disabled>Kopiuj składy</button>
-            <button id="resetBtn" class="danger">Reset</button>
-          </div>
+<div id="teamNamesBox" style="margin-top:10px"></div>
 
-          <div class="status" id="status">Wpisz zawodników i kliknij „Losuj (balans siły)”.</div>
-          <div class="small">
-            Format: <b>Imię [spacja] liczba</b>. Bez liczby = siła 3. (np. „Tomek 5”, „Radek”).
-          </div>
-        </div>
+<textarea id="players" placeholder="Tomek 5&#10;Kuba 4&#10;Bartek&#10;..."></textarea>
 
-        <div class="panel">
-          <div id="teamsGrid" class="teams"></div>
-        </div>
-      </div>
-    </div>
+<div class="row">
+<button id="drawBtn">Losuj (balans siły)</button>
+<button id="copyTeamsBtn">Kopiuj składy</button>
+</div>
 
-    <!-- TURNIEJ -->
-    <div id="viewCup" class="view">
-      <div class="grid">
-        <div class="panel">
-          <div class="box">
-            <p class="big" id="nextMatchTitle">Następny mecz: —</p>
-            <div class="muted" id="restInfo">Pauza: —</div>
-            <div class="muted" id="modeInfo">Tryb: —</div>
-          </div>
+<div id="teamsContainer"></div>
+</div>
 
-          <div class="formRow">
-            <input id="gA" type="number" min="0" inputmode="numeric" placeholder="gole gospodarzy" />
-            <input id="gB" type="number" min="0" inputmode="numeric" placeholder="gole gości" />
-            <button id="addResultBtn">Dodaj wynik</button>
-          </div>
+<div class="panel">
+<h3>Turniej</h3>
+<div id="nextMatch"></div>
+<div id="restInfo" class="small"></div>
 
-          <div class="row">
-            <button id="nextBtn" class="secondary">Pokaż kolejny mecz</button>
-            <button id="undoBtn" class="secondary" disabled>Cofnij ostatni</button>
-            <button id="copyTableBtn" class="secondary">Kopiuj tabelę</button>
-            <button id="saveTrainingBtn" class="secondary">Zapisz trening</button>
-            <button id="resetCupBtn" class="danger">Reset turnieju</button>
-          </div>
+<div class="row">
+<input type="number" id="g1" placeholder="Gole 1">
+<input type="number" id="g2" placeholder="Gole 2">
+<button id="addResult">Dodaj wynik</button>
+<button id="copyTable">Kopiuj tabelę</button>
+</div>
 
-          <div class="status" id="cupStatus">Dodaj wynik albo kliknij „Pokaż kolejny mecz”.</div>
-          <div class="small">
-            Turniej bierze liczbę drużyn z Losowania. Dla 3 drużyn: system „2 mecze + pauza”. Dla 4–6: rotacja kolejką.
-          </div>
-        </div>
+<table>
+<thead>
+<tr><th>Drużyna</th><th>M</th><th>Z</th><th>R</th><th>P</th><th>Bramki</th><th>Pkt</th></tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
 
-        <div class="panel">
-          <div style="font-weight:1000;">Tabela</div>
-          <table>
-            <thead>
-              <tr>
-                <th>Drużyna</th><th>M</th><th>Z</th><th>R</th><th>P</th><th>Bramki</th><th>+/-</th><th>Pkt</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-          </table>
+<table>
+<thead>
+<tr><th>#</th><th>Mecz</th><th>Wynik</th></tr>
+</thead>
+<tbody id="matchesBody"></tbody>
+</table>
 
-          <div style="margin-top:14px;font-weight:1000;">Mecze</div>
-          <table>
-            <thead>
-              <tr><th>#</th><th>Mecz</th><th>Wynik</th><th>Pauza</th></tr>
-            </thead>
-            <tbody id="matchesBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+<div class="row">
+<button id="saveTraining">Zapisz trening</button>
+<button id="resetCup">Reset turnieju</button>
+</div>
+</div>
 
-    <!-- HISTORIA -->
-    <div id="viewHist" class="view">
-      <div class="panel">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-          <div style="font-weight:1000;">Historia treningów</div>
-          <div class="row" style="margin-top:0;">
-            <button id="clearHistoryBtn" class="danger">Wyczyść historię</button>
-          </div>
-        </div>
-        <div class="small">Zapis przechowywany jest w pamięci przeglądarki (localStorage) na tym telefonie.</div>
-        <div id="historyList"></div>
-      </div>
-    </div>
-  </div>
+<div class="panel">
+<h3>Historia treningów</h3>
+<div id="history"></div>
+</div>
 
 <script>
-  // ---------- TEAM THEMES ----------
-  // Pierwsze 3 jak chciałeś, reszta dodatkowe kolory.
-  const TEAM_THEMES = [
-    { key:"yellow", name:"Żółci",  colorVar:"--yellow" },
-    { key:"orange", name:"Pomarańczowi", colorVar:"--orange" },
-    { key:"purple", name:"Fioletowi", colorVar:"--purple" },
-    { key:"blue",   name:"Niebiescy", colorVar:"--blue" },
-    { key:"red",    name:"Czerwoni", colorVar:"--red" },
-    { key:"green",  name:"Zieloni", colorVar:"--green" },
-  ];
 
-  function escapeHtml(str){
-    return str.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
-              .replaceAll('"',"&quot;").replaceAll("'","&#039;");
-  }
-  function shuffle(arr){
-    for(let i=arr.length-1;i>0;i--){
-      const j=Math.floor(Math.random()*(i+1));
-      [arr[i],arr[j]]=[arr[j],arr[i]];
-    }
-    return arr;
-  }
+const COLORS=["yellow","orange","purple","blue","red","green"];
+let teams=[];
+let scheduleIndex=0;
+let matches=[];
+
+function getTeamCount(){
+return Number(document.getElementById("teamCount").value);
+}
+
+function renderTeamNameInputs(){
+const n=getTeamCount();
+const box=document.getElementById("teamNamesBox");
+box.innerHTML="";
+for(let i=0;i<n;i++){
+box.innerHTML+=`<input data-i="${i}" placeholder="Nazwa drużyny ${i+1}" style="margin-bottom:5px">`;
+}
+}
+
+document.getElementById("teamCount").addEventListener("change",()=>{
+renderTeamNameInputs();
+resetTournament();
+});
+
+renderTeamNameInputs();
+
+function parsePlayers(){
+const raw=document.getElementById("players").value.split("\n").map(x=>x.trim()).filter(Boolean);
+return raw.map(r=>{
+const parts=r.split(" ");
+let power=3;
+if(!isNaN(parts[parts.length-1])){
+power=Number(parts.pop());
+}
+return {name:parts.join(" "),power};
+});
+}
+
+function balance(players,n){
+players.sort((a,b)=>b.power-a.power);
+let buckets=Array.from({length:n},()=>({sum:0,list:[]}));
+for(const p of players){
+buckets.sort((a,b)=>a.sum-b.sum);
+buckets[0].list.push(p);
+buckets[0].sum+=p.power;
+}
+return buckets;
+}
+
+function drawTeams(){
+const n=getTeamCount();
+const players=parsePlayers();
+if(players.length<n)return alert("Za mało zawodników");
+const buckets=balance(players,n);
+teams=buckets.map((b,i)=>{
+const custom=document.querySelector(`[data-i='${i}']`).value;
+return {
+name:custom||`Drużyna ${i+1}`,
+color:COLORS[i],
+players:b.list,
+sum:b.sum
+};
+});
+renderTeams();
+resetTournament();
+}
+
+function renderTeams(){
+const box=document.getElementById("teamsContainer");
+box.innerHTML="";
+teams.forEach(t=>{
+box.innerHTML+=`
+<div class="teamCard">
+<b>${t.name}</b> (suma ${t.sum})
+<ul>${t.players.map(p=>`<li>${p.name} (${p.power})</li>`).join("")}</ul>
+</div>`;
+});
+}
+
+document.getElementById("drawBtn").onclick=drawTeams;
+
+document.getElementById("copyTeamsBtn").onclick=()=>{
+let text="SKŁADY:\n\n";
+teams.forEach(t=>{
+text+=`${t.name}:\n`;
+t.players.forEach(p=>text+=`- ${p.name}\n`);
+text+="\n";
+});
+navigator.clipboard.writeText(text);
+};
+
+function getNextMatch(){
+const n=teams.length;
+if(n===3){
+const pattern=[
+[0,1],[0,2],[1,2]
+];
+return pattern[scheduleIndex%3];
+}else{
+return [scheduleIndex%n,(scheduleIndex+1)%n];
+}
+}
+
+function updateNextMatch(){
+if(teams.length<2)return;
+const [a,b]=getNextMatch();
+document.getElementById("nextMatch").innerHTML=`<b>Następny mecz:</b> ${teams[a].name} - ${teams[b].name}`;
+const rest=teams.map((t,i)=>i).filter(i=>i!==a&&i!==b).map(i=>teams[i].name).join(", ");
+document.getElementById("restInfo").innerText="Pauza: "+(rest||"—");
+}
+
+function resetTournament(){
+scheduleIndex=0;
+matches=[];
+updateNextMatch();
+renderTable();
+}
+
+document.getElementById("addResult").onclick=()=>{
+const g1=Number(document.getElementById("g1").value);
+const g2=Number(document.getElementById("g2").value);
+if(isNaN(g1)||isNaN(g2))return;
+const [a,b]=getNextMatch();
+matches.push({a,b,g1,g2});
+scheduleIndex++;
+updateNextMatch();
+renderTable();
+document.getElementById("g1").value="";
+document.getElementById("g2").value="";
+};
+
+function renderTable(){
+let stats=teams.map(t=>({name:t.name,M:0,Z:0,R:0,P:0,GF:0,GA:0,Pkt:0}));
+matches.forEach(m=>{
+let A=stats[m.a],B=stats[m.b];
+A.M++;B.M++;
+A.GF+=m.g1;A.GA+=m.g2;
+B.GF+=m.g2;B.GA+=m.g1;
+if(m.g1>m.g2){A.Z++;B.P++;A.Pkt+=3}
+else if(m.g2>m.g1){B.Z++;A.P++;B.Pkt+=3}
+else{A.R++;B.R++;A.Pkt++;B.Pkt++}
+});
+stats.sort((x,y)=>y.Pkt-x.Pkt||(y.GF-y.GA)-(x.GF-x.GA)||y.GF-x.GF);
+
+const tb=document.getElementById("tableBody");
+tb.innerHTML="";
+stats.forEach(s=>{
+tb.innerHTML+=`<tr>
+<td>${s.name}</td><td>${s.M}</td><td>${s.Z}</td><td>${s.R}</td><td>${s.P}</td>
+<td>${s.GF}-${s.GA}</td><td>${s.Pkt}</td>
+</tr>`;
+});
+
+const mb=document.getElementById("matchesBody");
+mb.innerHTML="";
+matches.forEach((m,i)=>{
+mb.innerHTML+=`<tr>
+<td>${i+1}</td>
+<td>${teams[m.a].name} - ${teams[m.b].name}</td>
+<td>${m.g1}:${m.g2}</td>
+</tr>`;
+});
+}
+
+document.getElementById("copyTable").onclick=()=>{
+let text="TABELA:\n";
+document.querySelectorAll("#tableBody tr").forEach(tr=>{
+text+=tr.innerText+"\n";
+});
+navigator.clipboard.writeText(text);
+};
+
+document.getElementById("saveTraining").onclick=()=>{
+const history=JSON.parse(localStorage.getItem("trainingHistory")||"[]");
+history.unshift({
+date:new Date().toLocaleString(),
+teams,
+matches
+});
+localStorage.setItem("trainingHistory",JSON.stringify(history));
+renderHistory();
+};
+
+function renderHistory(){
+const history=JSON.parse(localStorage.getItem("trainingHistory")||"[]");
+const box=document.getElementById("history");
+box.innerHTML="";
+history.forEach((h,i)=>{
+box.innerHTML+=`
+<div class="teamCard">
+<b>${h.date}</b>
+<div class="row">
+<button onclick="loadTraining(${i})">Wczytaj</button>
+<button onclick="deleteTraining(${i})">Usuń</button>
+</div>
+</div>`;
+});
+}
+
+window.loadTraining=function(i){
+const history=JSON.parse(localStorage.getItem("trainingHistory")||"[]");
+const h=history[i];
+teams=h.teams;
+matches=h.matches;
+scheduleIndex=matches.length%teams.length;
+renderTeams();
+renderTable();
+updateNextMatch();
+};
+
+window.deleteTraining=function(i){
+let history=JSON.parse(localStorage.getItem("trainingHistory")||"[]");
+history.splice(i,1);
+localStorage.setItem("trainingHistory",JSON.stringify(history));
+renderHistory();
+};
+
+renderHistory();
+updateNextMatch();
 
-  // ---------- TABS ----------
-  const tabDraw = document.getElementById("tabDraw");
-  const tabCup  = document.getElementById("tabCup");
-  const tabHist = document.getElementById("tabHist");
-  const viewDraw = document.getElementById("viewDraw");
-  const viewCup  = document.getElementById("viewCup");
-  const viewHist = document.getElementById("viewHist");
-
-  function showTab(which){
-    const drawOn = which === "draw";
-    const cupOn = which === "cup";
-    const histOn = which === "hist";
-
-    tabDraw.classList.toggle("active", drawOn);
-    tabCup.classList.toggle("active", cupOn);
-    tabHist.classList.toggle("active", histOn);
-
-    viewDraw.classList.toggle("show", drawOn);
-    viewCup.classList.toggle("show", cupOn);
-    viewHist.classList.toggle("show", histOn);
-
-    if(cupOn) renderAllCup();
-    if(histOn) renderHistory();
-  }
-  tabDraw.addEventListener("click", ()=>showTab("draw"));
-  tabCup.addEventListener("click", ()=>showTab("cup"));
-  tabHist.addEventListener("click", ()=>showTab("hist"));
-
-  // ---------- LOSOWANIE ----------
-  const elPlayers = document.getElementById("players");
-  const teamsCountSel = document.getElementById("teamsCount");
-  const drawBtn = document.getElementById("drawBtn");
-  const reshuffleBtn = document.getElementById("reshuffleBtn");
-  const copyTeamsBtn = document.getElementById("copyTeamsBtn");
-  const resetBtn = document.getElementById("resetBtn");
-  const statusEl = document.getElementById("status");
-  const teamsGrid = document.getElementById("teamsGrid");
-
-  let lastTeams = null; // { teams:[{key,name,sum,players:[{name,power}]}], teamsCount, playersRaw }
-
-  function getTeamsConfig(){
-    const n = Number(teamsCountSel.value);
-    const teams = TEAM_THEMES.slice(0, n).map((t, idx)=>({
-      idx,
-      key: t.key,
-      name: t.name,
-      colorVar: t.colorVar
-    }));
-    return { n, teams };
-  }
-
-  function parsePlayers(raw){
-    const lines = raw.split("\n").map(s=>s.trim()).filter(Boolean);
-    const map = new Map();
-    for(const line of lines){
-      const parts = line.split(/\s+/).filter(Boolean);
-      let power = 3;
-      if(parts.length >= 2){
-        const maybe = parts[parts.length - 1];
-        const num = Number(maybe);
-        if(Number.isFinite(num) && num >= 0){
-          power = num;
-          parts.pop();
-        }
-      }
-      const name = parts.join(" ").trim();
-      if(!name) continue;
-      if(!map.has(name) || map.get(name).power < power){
-        map.set(name, {name, power});
-      }
-    }
-    return Array.from(map.values());
-  }
-
-  // Greedy balance for N teams:
-  // sort by power desc, assign each player to team with smallest sum (then smallest size)
-  function balanceTeams(players, teams){
-    const shuffled = shuffle([...players]);
-    shuffled.sort((a,b)=>b.power - a.power);
-
-    const buckets = teams.map(t=>({ ...t, sum:0, players:[] }));
-
-    for(const p of shuffled){
-      buckets.sort((A,B)=>{
-        if(A.sum !== B.sum) return A.sum - B.sum;
-        if(A.players.length !== B.players.length) return A.players.length - B.players.length;
-        return Math.random() - 0.5;
-      });
-      buckets[0].players.push(p);
-      buckets[0].sum += p.power;
-    }
-    // sort players by name for display
-    for(const b of buckets){
-      b.players.sort((a,b)=>a.name.localeCompare(b.name,"pl"));
-    }
-    // restore original team order (idx)
-    buckets.sort((a,b)=>a.idx - b.idx);
-    return buckets;
-  }
-
-  function renderTeamsCards(teamsBuckets){
-    teamsGrid.innerHTML = "";
-    for(const t of teamsBuckets){
-      const card = document.createElement("div");
-      card.className = "teamCard";
-      card.innerHTML = `
-        <div class="teamTitle">
-          <span class="dot" style="background:var(${t.colorVar})"></span>
-          ${escapeHtml(t.name)}
-          <span class="count">${t.players.length}</span>
-        </div>
-        <div class="power">Suma siły: ${t.sum}</div>
-        <ul>${t.players.map(p=>`<li>${escapeHtml(p.name)} <span style="color:var(--muted);font-weight:900;">(${p.power})</span></li>`).join("")}</ul>
-      `;
-      teamsGrid.appendChild(card);
-    }
-  }
-
-  function doDraw(){
-    const players = parsePlayers(elPlayers.value);
-    const { n, teams } = getTeamsConfig();
-    if(players.length < n){
-      statusEl.textContent = `Dodaj minimum ${n} zawodników (1 na drużynę).`;
-      return;
-    }
-    const buckets = balanceTeams(players, teams);
-    lastTeams = { teams: buckets, teamsCount:n, playersRaw: elPlayers.value };
-
-    renderTeamsCards(buckets);
-    statusEl.textContent = "Wylosowano i wyrównano ✅";
-    reshuffleBtn.disabled = false;
-    copyTeamsBtn.disabled = false;
-
-    localStorage.setItem("players_balanced_v2", elPlayers.value);
-    localStorage.setItem("teams_count_v2", String(n));
-    localStorage.setItem("teams_balanced_v2", JSON.stringify(lastTeams));
-
-    // turniej też zależy od liczby drużyn – jeśli zmieniłeś N, to resetujemy stan kolejki (żeby nie mieszać)
-    ensureCupConsistency(true);
-  }
-
-  drawBtn.addEventListener("click", doDraw);
-  reshuffleBtn.addEventListener("click", doDraw);
-
-  copyTeamsBtn.addEventListener("click", async ()=>{
-    if(!lastTeams){ statusEl.textContent = "Najpierw wylosuj składy."; return; }
-    const lines = [];
-    lines.push("SKŁADY – trening");
-    for(const t of lastTeams.teams){
-      lines.push(`${t.name} (suma ${t.sum} | ${t.players.length}):`);
-      for(const p of t.players){
-        lines.push(`- ${p.name} (${p.power})`);
-      }
-      lines.push("");
-    }
-    const text = lines.join("\n").trim();
-    try{
-      await navigator.clipboard.writeText(text);
-      statusEl.textContent = "Składy skopiowane ✅";
-    }catch{
-      statusEl.textContent = "Nie mogę skopiować (ograniczenia przeglądarki).";
-    }
-  });
-
-  resetBtn.addEventListener("click", ()=>{
-    elPlayers.value = "";
-    teamsGrid.innerHTML = "";
-    statusEl.textContent = "Wpisz zawodników i kliknij „Losuj (balans siły)”.";
-    reshuffleBtn.disabled = true;
-    copyTeamsBtn.disabled = true;
-    lastTeams = null;
-
-    localStorage.removeItem("players_balanced_v2");
-    localStorage.removeItem("teams_balanced_v2");
-    // nie kasujemy history, ale resetujemy turniej
-    resetCup();
-  });
-
-  teamsCountSel.addEventListener("change", ()=>{
-    localStorage.setItem("teams_count_v2", teamsCountSel.value);
-    // zmiana liczby drużyn wpływa na turniej – resetujemy bieżącą logikę
-    resetCup();
-    // a jeśli są już składy, przelicz losowanie jeszcze raz (żeby było równo dla nowej liczby)
-    if(elPlayers.value.trim()) doDraw();
-  });
-
-  // ---------- TURNIEJ ----------
-  const nextMatchTitle = document.getElementById("nextMatchTitle");
-  const restInfo = document.getElementById("restInfo");
-  const modeInfo = document.getElementById("modeInfo");
-  const cupStatus = document.getElementById("cupStatus");
-  const nextBtn = document.getElementById("nextBtn");
-  const addResultBtn = document.getElementById("addResultBtn");
-  const undoBtn = document.getElementById("undoBtn");
-  const resetCupBtn = document.getElementById("resetCupBtn");
-  const copyTableBtn = document.getElementById("copyTableBtn");
-  const saveTrainingBtn = document.getElementById("saveTrainingBtn");
-  const gA = document.getElementById("gA");
-  const gB = document.getElementById("gB");
-  const tableBody = document.getElementById("tableBody");
-  const matchesBody = document.getElementById("matchesBody");
-
-  // cupState działa dla N drużyn:
-  // mode "block3" => Twoje 2 mecze + pauza (tylko gdy N=3)
-  // mode "queue"  => kolejka (N>=2)
-  let cupState = {
-    teamsCount: 3,
-    mode: "block3",
-    // block3
-    starterIdx: 2,
-    stepInBlock: 0,
-    // queue
-    queueIdx: 0,
-    // common
-    currentMatch: null, // {homeIdx, awayIdx, restIdxs:[]}
-    matches: [] // {homeIdx, awayIdx, restIdxs, gh, ga}
-  };
-
-  function getCupTeams(){
-    const { n, teams } = getTeamsConfig();
-    // w turnieju nazwy bierzemy z TEAM_THEMES
-    return { n, teams };
-  }
-
-  function saveCup(){ localStorage.setItem("cup_state_v2", JSON.stringify(cupState)); }
-  function loadCup(){
-    const s = localStorage.getItem("cup_state_v2");
-    if(!s) return;
-    try{
-      const parsed = JSON.parse(s);
-      if(parsed && typeof parsed.teamsCount==="number") cupState = parsed;
-    }catch{}
-  }
-
-  function teamLabelByIdx(idx){
-    const { teams } = getCupTeams();
-    return teams[idx]?.name ?? `Drużyna ${idx+1}`;
-  }
-
-  function ensureCupConsistency(forceReset=false){
-    const { n } = getCupTeams();
-    if(forceReset || cupState.teamsCount !== n){
-      resetCup();
-    }
-  }
-
-  function buildMatch(){
-    const { n } = getCupTeams();
-    cupState.teamsCount = n;
-    cupState.mode = (n === 3) ? "block3" : "queue";
-
-    if(cupState.mode === "block3"){
-      // block: (S vs N1), (S vs N2), (N1 vs N2) and starter becomes N2
-      const i = ((cupState.starterIdx % 3) + 3) % 3;
-      const n1 = (i + 1) % 3;
-      const n2 = (i + 2) % 3;
-
-      let homeIdx, awayIdx, restIdxs;
-      if(cupState.stepInBlock === 0){
-        homeIdx = i; awayIdx = n1; restIdxs = [n2];
-      } else if(cupState.stepInBlock === 1){
-        homeIdx = i; awayIdx = n2; restIdxs = [n1];
-      } else {
-        homeIdx = n1; awayIdx = n2; restIdxs = [i];
-      }
-      cupState.currentMatch = { homeIdx, awayIdx, restIdxs };
-      modeInfo.textContent = "Tryb: 3 drużyny – 2 mecze + pauza ✅";
-    } else {
-      // queue rotation: i vs i+1, rest = others, then i++.
-      const i = ((cupState.queueIdx % n) + n) % n;
-      const homeIdx = i;
-      const awayIdx = (i + 1) % n;
-      const restIdxs = [];
-      for(let k=0;k<n;k++){
-        if(k !== homeIdx && k !== awayIdx) restIdxs.push(k);
-      }
-      cupState.currentMatch = { homeIdx, awayIdx, restIdxs };
-      modeInfo.textContent = `Tryb: ${n} drużyn – rotacja kolejką ✅`;
-    }
-    saveCup();
-  }
-
-  function showMatch(){
-    if(!cupState.currentMatch) buildMatch();
-    const m = cupState.currentMatch;
-    nextMatchTitle.textContent = `Następny mecz: ${teamLabelByIdx(m.homeIdx)} – ${teamLabelByIdx(m.awayIdx)}`;
-    const restText = m.restIdxs.length ? m.restIdxs.map(teamLabelByIdx).join(", ") : "—";
-    restInfo.textContent = `Pauza: ${restText}`;
-    undoBtn.disabled = cupState.matches.length === 0;
-  }
-
-  function advanceMatch(){
-    if(cupState.mode === "block3"){
-      cupState.stepInBlock++;
-      if(cupState.stepInBlock > 2){
-        cupState.stepInBlock = 0;
-        cupState.starterIdx = (cupState.starterIdx + 2) % 3;
-      }
-    } else {
-      const { n } = getCupTeams();
-      cupState.queueIdx = (cupState.queueIdx + 1) % n;
-    }
-    buildMatch();
-    showMatch();
-    cupStatus.textContent = "Ustawiono kolejny mecz ✅";
-  }
-
-  function computeTable(){
-    const { n } = getCupTeams();
-    const stats = Array.from({length:n}, (_,i)=>({
-      idx:i, name: teamLabelByIdx(i), M:0,Z:0,R:0,P:0,GF:0,GA:0,Pkt:0
-    }));
-
-    for(const m of cupState.matches){
-      const H = stats[m.homeIdx];
-      const A = stats[m.awayIdx];
-      H.M++; A.M++;
-      H.GF += m.gh; H.GA += m.ga;
-      A.GF += m.ga; A.GA += m.gh;
-
-      if(m.gh > m.ga){ H.Z++; A.P++; H.Pkt += 3; }
-      else if(m.gh < m.ga){ A.Z++; H.P++; A.Pkt += 3; }
-      else { H.R++; A.R++; H.Pkt += 1; A.Pkt += 1; }
-    }
-    const rows = stats.map(s=>({...s, GD:s.GF-s.GA, goals:`${s.GF}-${s.GA}`}));
-    rows.sort((x,y)=>{
-      if(y.Pkt !== x.Pkt) return y.Pkt - x.Pkt;
-      if(y.GD !== x.GD) return y.GD - x.GD;
-      if(y.GF !== x.GF) return y.GF - x.GF;
-      return x.name.localeCompare(y.name,"pl");
-    });
-    return rows;
-  }
-
-  function renderAllCup(){
-    ensureCupConsistency(false);
-    showMatch();
-
-    const rows = computeTable();
-    tableBody.innerHTML = "";
-    for(const r of rows){
-      tableBody.insertAdjacentHTML("beforeend", `
-        <tr>
-          <td><b>${escapeHtml(r.name)}</b></td>
-          <td>${r.M}</td><td>${r.Z}</td><td>${r.R}</td><td>${r.P}</td>
-          <td>${r.goals}</td><td>${r.GD}</td><td><b>${r.Pkt}</b></td>
-        </tr>
-      `);
-    }
-
-    matchesBody.innerHTML = "";
-    cupState.matches.forEach((m, idx)=>{
-      const restText = m.restIdxs.length ? m.restIdxs.map(teamLabelByIdx).join(", ") : "—";
-      matchesBody.insertAdjacentHTML("beforeend", `
-        <tr>
-          <td>${idx+1}</td>
-          <td>${escapeHtml(teamLabelByIdx(m.homeIdx))} – ${escapeHtml(teamLabelByIdx(m.awayIdx))}</td>
-          <td><b>${m.gh}:${m.ga}</b></td>
-          <td>${escapeHtml(restText)}</td>
-        </tr>
-      `);
-    });
-
-    undoBtn.disabled = cupState.matches.length === 0;
-  }
-
-  nextBtn.addEventListener("click", ()=>{
-    advanceMatch();
-    renderAllCup();
-  });
-
-  addResultBtn.addEventListener("click", ()=>{
-    if(!cupState.currentMatch) buildMatch();
-    const gh = Number(gA.value);
-    const ga = Number(gB.value);
-    if(!Number.isFinite(gh) || !Number.isFinite(ga) || gh<0 || ga<0){
-      cupStatus.textContent = "Podaj poprawne gole (0 lub więcej).";
-      return;
-    }
-
-    const m = cupState.currentMatch;
-    cupState.matches.push({ homeIdx:m.homeIdx, awayIdx:m.awayIdx, restIdxs:[...m.restIdxs], gh, ga });
-    gA.value = ""; gB.value = "";
-    cupStatus.textContent = "Dodano wynik ✅";
-
-    advanceMatch();
-    renderAllCup();
-    saveCup();
-  });
-
-  undoBtn.addEventListener("click", ()=>{
-    if(!cupState.matches.length) return;
-    cupState.matches.pop();
-    cupStatus.textContent = "Cofnięto ostatni wynik.";
-    saveCup();
-    renderAllCup();
-  });
-
-  function resetCup(){
-    const { n } = getCupTeams();
-    cupState = {
-      teamsCount: n,
-      mode: (n===3) ? "block3" : "queue",
-      starterIdx: 2,
-      stepInBlock: 0,
-      queueIdx: 0,
-      currentMatch: null,
-      matches: []
-    };
-    localStorage.setItem("cup_state_v2", JSON.stringify(cupState));
-    buildMatch();
-    renderAllCup();
-  }
-
-  resetCupBtn.addEventListener("click", ()=>{
-    resetCup();
-    cupStatus.textContent = "Reset turnieju ✅";
-  });
-
-  copyTableBtn.addEventListener("click", async ()=>{
-    const rows = computeTable();
-    const tableLines = rows.map((r,i)=>
-      `${i+1}. ${r.name} | M:${r.M} Z:${r.Z} R:${r.R} P:${r.P} | ${r.goals} (${r.GD}) | Pkt:${r.Pkt}`
-    ).join("\n");
-
-    const matchesLines = cupState.matches.map((m,i)=>{
-      const restText = m.restIdxs.length ? m.restIdxs.map(teamLabelByIdx).join(", ") : "—";
-      return `${i+1}) ${teamLabelByIdx(m.homeIdx)} – ${teamLabelByIdx(m.awayIdx)} ${m.gh}:${m.ga} (pauza: ${restText})`;
-    }).join("\n");
-
-    const text =
-`TABELA – trening
-${tableLines}
-
-MECZE:
-${matchesLines || "(brak)"}`;
-
-    try{
-      await navigator.clipboard.writeText(text);
-      cupStatus.textContent = "Tabela + mecze skopiowane ✅";
-    }catch{
-      cupStatus.textContent = "Nie mogę skopiować (ograniczenia przeglądarki).";
-    }
-  });
-
-  // ---------- HISTORIA ----------
-  const historyList = document.getElementById("historyList");
-  const clearHistoryBtn = document.getElementById("clearHistoryBtn");
-
-  function loadHistory(){
-    const raw = localStorage.getItem("training_history_v1");
-    if(!raw) return [];
-    try{ return JSON.parse(raw) || []; }catch{ return []; }
-  }
-  function saveHistory(list){
-    localStorage.setItem("training_history_v1", JSON.stringify(list));
-  }
-  function nowStamp(){
-    const d = new Date();
-    const pad = (x)=>String(x).padStart(2,"0");
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  }
-  function uuid(){
-    return Math.random().toString(16).slice(2) + "-" + Date.now().toString(16);
-  }
-
-  saveTrainingBtn.addEventListener("click", ()=>{
-    const { n } = getTeamsConfig();
-    const history = loadHistory();
-    const entry = {
-      id: uuid(),
-      ts: nowStamp(),
-      teamsCount: n,
-      playersRaw: elPlayers.value || "",
-      teamsSnapshot: lastTeams,
-      cupSnapshot: cupState
-    };
-    history.unshift(entry);
-    saveHistory(history);
-    cupStatus.textContent = "Zapisano trening do historii ✅";
-  });
-
-  function renderHistory(){
-    const history = loadHistory();
-    historyList.innerHTML = "";
-
-    if(history.length === 0){
-      historyList.innerHTML = `<div class="small" style="margin-top:10px;">Brak zapisanych treningów.</div>`;
-      return;
-    }
-
-    for(const h of history){
-      const matchesCount = h.cupSnapshot?.matches?.length ?? 0;
-      const div = document.createElement("div");
-      div.className = "histItem";
-      div.innerHTML = `
-        <div class="histMeta">
-          <div style="font-weight:1000;">${escapeHtml(h.ts)}</div>
-          <div class="small">Drużyn: <b>${h.teamsCount}</b> • Meczy: <b>${matchesCount}</b></div>
-        </div>
-        <div class="histBtns">
-          <button class="secondary" data-act="load" data-id="${h.id}">Wczytaj</button>
-          <button class="danger" data-act="del" data-id="${h.id}">Usuń</button>
-        </div>
-      `;
-      historyList.appendChild(div);
-    }
-
-    historyList.querySelectorAll("button").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const id = btn.dataset.id;
-        const act = btn.dataset.act;
-        let history = loadHistory();
-
-        if(act === "del"){
-          history = history.filter(x=>x.id !== id);
-          saveHistory(history);
-          renderHistory();
-          return;
-        }
-
-        if(act === "load"){
-          const entry = history.find(x=>x.id === id);
-          if(!entry) return;
-
-          // restore
-          teamsCountSel.value = String(entry.teamsCount || 3);
-          elPlayers.value = entry.playersRaw || "";
-
-          // restore teams snapshot (optional)
-          if(entry.teamsSnapshot && entry.teamsSnapshot.teams){
-            lastTeams = entry.teamsSnapshot;
-            renderTeamsCards(lastTeams.teams);
-            reshuffleBtn.disabled = false;
-            copyTeamsBtn.disabled = false;
-            statusEl.textContent = "Wczytano losowanie z historii ✅";
-          } else {
-            lastTeams = null;
-            teamsGrid.innerHTML = "";
-            reshuffleBtn.disabled = true;
-            copyTeamsBtn.disabled = true;
-          }
-
-          // restore cup snapshot
-          if(entry.cupSnapshot){
-            cupState = entry.cupSnapshot;
-            saveCup();
-            renderAllCup();
-          } else {
-            resetCup();
-          }
-
-          // persist base settings
-          localStorage.setItem("players_balanced_v2", elPlayers.value);
-          localStorage.setItem("teams_count_v2", String(entry.teamsCount || 3));
-          localStorage.setItem("teams_balanced_v2", JSON.stringify(lastTeams || null));
-
-          showTab("cup");
-        }
-      });
-    });
-  }
-
-  clearHistoryBtn.addEventListener("click", ()=>{
-    localStorage.removeItem("training_history_v1");
-    renderHistory();
-  });
-
-  // ---------- INIT ----------
-  (function init(){
-    // restore settings
-    const savedCount = localStorage.getItem("teams_count_v2");
-    if(savedCount) teamsCountSel.value = savedCount;
-
-    const savedPlayers = localStorage.getItem("players_balanced_v2");
-    if(savedPlayers) elPlayers.value = savedPlayers;
-
-    const savedTeams = localStorage.getItem("teams_balanced_v2");
-    if(savedTeams){
-      try{
-        const t = JSON.parse(savedTeams);
-        if(t && t.teams){
-          lastTeams = t;
-          renderTeamsCards(t.teams);
-          reshuffleBtn.disabled = false;
-          copyTeamsBtn.disabled = false;
-          statusEl.textContent = "Wczytano poprzednie losowanie ✅";
-        }
-      }catch{}
-    }
-
-    loadCup();
-    ensureCupConsistency(true);
-    buildMatch();
-    renderAllCup();
-  })();
 </script>
 </body>
 </html>
